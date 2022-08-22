@@ -1,79 +1,82 @@
-import { Button, Form, Input } from "antd";
 import React from "react";
+import {
+  Button,
+  Stack,
+  Grid,
+  Card,
+  CardContent,
+  TextField
+} from "@mui/material";
+import Swal from 'sweetalert2';
 import "./Home.scss";
 
-const Home = () => {
-  const onFinish = (values) => {
-    console.log("Success:", values);
-  };
+function alert() {
+  const { value: partida } = Swal.fire({
+    title: 'Ingrese el código de la partida',
+    input: 'text',
+    showCancelButton: true,
+    inputValidator: (value) => {
+      if (!value) {
+        return 'Por favor ingrese el código!'
+        }
+      }
+    })
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
+    if (partida) {
+      Swal.fire(`Tu codigo es ${partida}`)
+    }
+  }  
 
+export default function Home() {
   return (
-    <Form
-      className="home"
-      name="basic"
-      labelCol={{
-        span: 8,
-      }}
-      wrapperCol={{
-        span: 16,
-      }}
-      onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-      autoComplete="off"
-    >
-      <h2>4 EN RAYA</h2>
-      <Form.Item
-        label="Nick:"
-        name="nick"
-        rules={[
-          {
-            required: true,
-            message: "Por favor ingrese su nombre!",
-          },
-        ]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Form.Item
-        wrapperCol={{
-          offset: 8,
-          span: 16,
-          sm: 3,
-        }}
-      >
-        <Button type="primary" htmlType="submit">
-          Jugar!
-        </Button>
-      </Form.Item>
-
-      <Form.Item
-        wrapperCol={{
-          offset: 8,
-          span: 16,
-        }}
-      >
-        <Button type="primary" htmlType="submit">
-          Buscar partida pública
-        </Button>
-      </Form.Item>
-
-      <Form.Item
-        wrapperCol={{
-          offset: 8,
-          span: 16,
-        }}
-      >
-        <Button type="primary" htmlType="submit">
-          Crear partida privada
-        </Button>
-      </Form.Item>
-    </Form>
+    <Stack direction="column" ml={2} mt={12} justifyContent="center">
+      <Grid container spacing={2} justifyContent="center">
+        <Grid item xs={4} style={{ textAlign: "center" }}>
+          <Card style={{ background: "#ffffff9e"}} sx={{ minWidth: 300 }}>
+            <CardContent>
+              <h1>4 EN RAYA</h1>
+              
+                <Stack direction="row" justifyContent="center" mt={8}>
+                  <TextField
+                    style={{ background: "white" }}
+                   
+                    label="Nick"
+                  />
+                </Stack>
+               
+                <Stack direction="row" justifyContent="center" mt={4}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    style={{ background: "#053742" }}
+                  >
+                    Partida Pública
+                  </Button>
+                </Stack>
+                <Stack direction="row" justifyContent="center" mt={4}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    style={{ background: "#053742" }}
+                  >
+                    Crear Partida Privada
+                  </Button>
+                </Stack>
+                <Stack direction="row" justifyContent="center" mb={8} mt={4}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    style={{ background: "#053742" }}
+                  >
+                    Buscar Partida Privada
+                  </Button>
+                </Stack>
+              
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Stack>      
   );
 };
 
-export default Home;

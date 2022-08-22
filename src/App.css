@@ -5,8 +5,10 @@ html,
 }
 
 .App {
+  background-image: url("../src/assets/img/fondoHome.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
   min-height: 100%;
-  text-align: center;
   background-color: hsla(221, 16%, 39%, 0.49);
   flex-direction: column;
   display:flex;
@@ -17,7 +19,7 @@ html,
 
 
 h2 {
-  background-color: #4181c09e;
+  background-color: #ffffff9e;
   text-align: center;
   padding:0.8%;
   border-style: groove
