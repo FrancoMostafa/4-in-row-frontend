@@ -10,6 +10,9 @@ import {
 import Swal from "sweetalert2";
 import "./Home.scss";
 
+const URL_PUBLIC = "ws://localhost:8080/ws_search_public";
+const URL_PRIVATE = "ws://localhost:8080/ws_search_private";
+
 export default function Home() {
   return (
     <Stack direction="column" ml={2} mt={12} justifyContent="center">
@@ -38,6 +41,7 @@ export default function Home() {
                   variant="contained"
                   type="submit"
                   style={{ background: "#053742" }}
+                  onClick={() => CreatePrivateMatch()}
                 >
                   Crear Partida Privada
                 </Button>
@@ -61,41 +65,100 @@ export default function Home() {
 }
 
 function FindPublicMatch() {
+  const ws_search = new WebSocket(URL_PUBLIC);
+
+  ws_search.onopen = () => {
+    ws_search.send("NEW PLAYER IN SEARCH");
+
+    ws_search.onmessage = (e) => {
+      window.location = `/game/${e.data}`;
+    };
+
+    ws_search.onclose = (e) => {};
+  };
+
   return Swal.fire({
     title: "Buscando oponente...",
-    showCancelButton: true,
-    showConfirmButton: false,
     allowOutsideClick: false,
     cancelButtonText: "Cancelar",
     cancelButtonColor: "red",
-    didOpen: () => {
-      Swal.showLoading();
-    },
+    showCancelButton: true,
+    showConfirmButton: false,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  }).then((result) => {
+    if (!result.isConfirmed) {
+      ws_search.close();
+    }
+  });
+}
+
+function CreatePrivateMatch() {
+  const numberMatch = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000);
+
+  const ws_search = new WebSocket(URL_PRIVATE);
+
+  ws_search.onopen = () => {
+    ws_search.send(`${numberMatch}`);
+
+    ws_search.onmessage = (e) => {
+      window.location = `/game/${e.data}`;
+    };
+
+    ws_search.onclose = (e) => {};
+  };
+
+  return Swal.fire({
+    title: `Su codigo de partida es ${numberMatch} esperando oponente...`,
+    allowOutsideClick: false,
+    showCancelButton: true,
+    showConfirmButton: false,
+    cancelButtonText: "Cancelar",
+    cancelButtonColor: "red",
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  }).then((result) => {
+    if (!result.isConfirmed) {
+      ws_search.close();
+    }
   });
 }
 
 function FindPrivateMatch() {
+  const ws_search = new WebSocket(URL_PRIVATE);
+
+  ws_search.onopen = () => {
+    ws_search.onmessage = (e) => {
+      window.location = `/game/${e.data}`;
+    };
+
+    ws_search.onclose = (e) => {};
+  };
+
   return Swal.fire({
     title: "Ingrese codigo de partida",
+    allowOutsideClick: false,
     input: "text",
     showCancelButton: true,
-    confirmButtonText: "Ingresar",
-    cancelButtonText: "Salir",
+    showCloseButton: true,
+    confirmButtonText: "Aceptar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "green",
+    cancelButtonColor: "red",
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
   }).then((result) => {
     if (result.value !== undefined && result.value !== "") {
-      Swal.fire({
-        title: "Exito!",
-        text: "El codigo es " + result.value,
-        icon: "success",
-        confirmButtonText: "Cerrar",
-      });
-    } else {
-      Swal.fire({
-        title: "Error!",
-        text: "El codigo es incorrecto",
-        icon: "error",
-        confirmButtonText: "Cerrar",
-      });
+      console.log(result.value);
     }
   });
 }
