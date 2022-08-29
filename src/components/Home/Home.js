@@ -186,6 +186,10 @@ function FindPrivateMatch() {
           left top
           no-repeat
         `,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            ws_search.close();
+          }
         });
       } else {
         window.location = `/game/${message}`;
@@ -212,24 +216,32 @@ function FindPrivateMatch() {
     no-repeat
   `,
   }).then((result) => {
-    if (verifyInputCode(result.value)) {
-      ws_search.send(`${result.value};FIND`);
+    if (!result.isConfirmed) {
+      ws_search.close();
     } else {
-      Swal.fire({
-        title: `Codigo Invalido`,
-        heightAuto: false,
-        allowOutsideClick: false,
-        showCancelButton: false,
-        showConfirmButton: true,
-        icon: "error",
-        confirmButtonText: "OK",
-        cancelButtonColor: "green",
-        backdrop: `
+      if (verifyInputCode(result.value)) {
+        ws_search.send(`${result.value};FIND`);
+      } else {
+        Swal.fire({
+          title: `Codigo Invalido`,
+          heightAuto: false,
+          allowOutsideClick: false,
+          showCancelButton: false,
+          showConfirmButton: true,
+          icon: "error",
+          confirmButtonText: "OK",
+          cancelButtonColor: "green",
+          backdrop: `
           rgba(0, 0, 0, 0.8)
           left top
           no-repeat
         `,
-      });
+        }).then((result) => {
+          if (result.isConfirmed) {
+            ws_search.close();
+          }
+        });
+      }
     }
   });
 }
