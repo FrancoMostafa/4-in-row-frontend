@@ -77,7 +77,7 @@ export default function Home() {
 
 function PreFunctionCall(nickSelected, functionCall) {
   if (nickSelected.length >= 3 && nickSelected.length <= 15) {
-    functionCall();
+    functionCall(nickSelected);
   } else {
     Swal.fire({
       title: `Por favor, ingrese un nick de 3 a 15 caracteres`,
@@ -97,14 +97,14 @@ function PreFunctionCall(nickSelected, functionCall) {
   }
 }
 
-function FindPublicMatch() {
+function FindPublicMatch(nickSelected) {
   const ws_search = new WebSocket(URL_PUBLIC);
 
   ws_search.onopen = () => {
     ws_search.send("NEW PLAYER IN SEARCH");
 
     ws_search.onmessage = (e) => {
-      window.location = `/game/${e.data}`;
+      window.location = `/game/${e.data}/${nickSelected}`;
     };
 
     ws_search.onclose = (e) => {};
@@ -130,7 +130,7 @@ function FindPublicMatch() {
   });
 }
 
-function CreatePrivateMatch() {
+function CreatePrivateMatch(nickSelected) {
   const numberMatch = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000);
 
   const ws_search = new WebSocket(URL_PRIVATE);
@@ -139,7 +139,7 @@ function CreatePrivateMatch() {
     ws_search.send(`${numberMatch};CREATE`);
 
     ws_search.onmessage = (e) => {
-      window.location = `/game/${e.data}`;
+      window.location = `/game/${e.data}/${nickSelected}`;
     };
 
     ws_search.onclose = (e) => {};
@@ -165,13 +165,12 @@ function CreatePrivateMatch() {
   });
 }
 
-function FindPrivateMatch() {
+function FindPrivateMatch(nickSelected) {
   const ws_search = new WebSocket(URL_PRIVATE);
 
   ws_search.onopen = () => {
     ws_search.onmessage = (e) => {
-      const message = e.data;
-      if (message === "THE GAME WAS NOT FOUND") {
+      if (e.data === "THE GAME WAS NOT FOUND") {
         Swal.fire({
           title: `No se encontro una partida con este codigo`,
           heightAuto: false,
@@ -192,7 +191,7 @@ function FindPrivateMatch() {
           }
         });
       } else {
-        window.location = `/game/${message}`;
+        window.location = `/game/${e.data}/${nickSelected}`;
       }
     };
 
