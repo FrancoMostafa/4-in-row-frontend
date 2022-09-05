@@ -91,66 +91,146 @@ const ConnectFourGame = () => {
 const URL_GAME = "ws://localhost:8080/ws_game";
 
 export default function Game() {
+  // eslint-disable-next-line no-unused-vars
   const [ws_game, setWs_game] = useState(new WebSocket(URL_GAME));
+  // eslint-disable-next-line no-unused-vars
   const [id, setId] = useState(useParams().gameId);
+  // eslint-disable-next-line no-unused-vars
   const [name, setName] = useState(useParams().nick);
+  // eslint-disable-next-line no-unused-vars
+  const [gameStatus, setGameStatus] = useState({});
 
   useEffect(() => {
     ws_game.onopen = () => {
-      const addMeMessage = {
-        gameId: id,
-        gameBoard: "",
-        chat: [],
-        detail: `ADD ME TO GAME;${name}`,
-      };
-
-      ws_game.send(JSON.stringify(addMeMessage));
+      ws_game.send(CreateMessageGame(id, "", [], `ADD ME TO GAME;${name}`));
 
       ws_game.onmessage = (e) => {
-        if (e.data === "WAITING") {
-          Swal.fire({
-            title: "Conectando...",
-            heightAuto: false,
-            allowOutsideClick: false,
-            showCancelButton: false,
-            showConfirmButton: false,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-            backdrop: `
-    rgba(0, 0, 0, 0.8)
-    left top
-    no-repeat
-  `,
-          });
-        }
-        if (e.data === "READY") {
-          Swal.fire({
-            icon: "warning",
-            title: "Comienza el juego",
-            heightAuto: false,
-            allowOutsideClick: false,
-            showCancelButton: false,
-            showConfirmButton: false,
-            timer: 1000,
-            backdrop: `
-    rgba(0, 0, 0, 0.8)
-    left top
-    no-repeat
-  `,
-          });
-        }
+        HandleMessageGame(JSON.parse(e.data));
       };
 
-      ws_game.onclose = (e) => {};
+      ws_game.onclose = (e) => {
+        SwalDisconnect();
+      };
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log(localStorage.getItem("nick"));
+  const HandleMessageGame = (message) => {
+    if (message.detail === "WAITING") {
+      SwalWaiting();
+    } else if (message.detail === "READY") {
+      SwalStart();
+      setGameStatus(message);
+    } else if (message.detail === "DISCONNECT") {
+      SwalDisconnectOpponent();
+    } else {
+      // LOGICA PASO DE MENSAJES DURANTE EL JUEGO
+    }
+  };
+
+  //return (
+  //  <main className="game">
+  //    <h1>4 EN RAYA</h1>
+  //    <ConnectFourGame />
+  //  </main>
+  //);
+
   return (
-    <main className="game">
-      <h1>4 EN RAYA</h1>
-      <ConnectFourGame />
-    </main>
+    <p>
+      <p>{gameStatus.gameId}</p>
+      <p>{gameStatus.player1Name}</p>
+      <p>{gameStatus.player2Name}</p>
+      <p>{gameStatus.chat}</p>
+      <p>{gameStatus.detail}</p>
+      <p>
+        <button onClick={() => ws_game.close()}>Cerrar</button>
+      </p>
+    </p>
   );
 }
+
+const CreateMessageGame = (gameId, gameBoard, chat, detail) => {
+  return JSON.stringify({
+    gameId: gameId,
+    gameBoard: gameBoard,
+    chat: chat,
+    detail: detail,
+  });
+};
+
+const SwalWaiting = () => {
+  return Swal.fire({
+    title: "Conectando...",
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  });
+};
+
+const SwalStart = () => {
+  return Swal.fire({
+    icon: "warning",
+    title: "Comienza el juego",
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 3000,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  });
+};
+
+const SwalDisconnect = () => {
+  return Swal.fire({
+    icon: "error",
+    title: "Se ha perdido la conexion",
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 5000,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      window.location = window.location.origin;
+    }
+  });
+};
+
+const SwalDisconnectOpponent = () => {
+  return Swal.fire({
+    icon: "error",
+    title: "Tu oponente se ha desconectado",
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 5000,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      window.location = window.location.origin;
+    }
+  });
+};
