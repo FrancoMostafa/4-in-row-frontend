@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import React, { useState, useEffect } from "react";
 import "./Game.scss";
+import { Stack, Grid, Card, CardContent, TextField } from "@mui/material";
 
 const GameColumn = ({ col, idx, onClick }) => {
   return (
@@ -94,17 +95,24 @@ export default function Game() {
   // eslint-disable-next-line no-unused-vars
   const [ws_game, setWs_game] = useState(new WebSocket(URL_GAME));
   // eslint-disable-next-line no-unused-vars
-  const [id, setId] = useState(useParams().gameId);
   // eslint-disable-next-line no-unused-vars
   const [name, setName] = useState(useParams().nick);
   // eslint-disable-next-line no-unused-vars
+  const [gameId, setGameId] = useState(useParams().gameId);
   const [board, setBoard] = useState({});
   const [chat, setChat] = useState([]);
+  const [chatMessage, setChatMessage] = useState("");
   const [players, setPlayers] = useState({});
+  const [playerId, setPlayerId] = useState("");
+  const [playerNumber, setPlayerNumber] = useState(0);
 
   useEffect(() => {
     ws_game.onopen = () => {
-      ws_game.send(CreateMessageGame(id, name, `ADD ME TO GAME`));
+      const playerId = (Math.random() + 1).toString(36).substring(7);
+      setPlayerId(playerId);
+      ws_game.send(
+        CreateMessageGame(gameId, `${name};${playerId}`, `ADD ME TO GAME`)
+      );
 
       ws_game.onmessage = (e) => {
         HandleMessageGame(JSON.parse(e.data));
@@ -121,24 +129,83 @@ export default function Game() {
     if (message.detail === "WAITING") {
       SwalWaiting();
     } else if (message.detail === "READY") {
-      SwalStart();
+      const player1Name = message.data[0].split(";")[0];
+      const player1Id = message.data[0].split(";")[1];
+      const player2Name = message.data[1].split(";")[0];
+      const player2Id = message.data[1].split(";")[1];
+
       setPlayers({
-        player1Name: message.data[0],
-        player1Id: message.data[1],
-        player2Name: message.data[2],
-        player2Id: message.data[3],
+        player1Name: player1Name,
+        player1Id: player1Id,
+        player2Name: player2Name,
+        player2Id: player2Id,
       });
+
+      if (playerId === player1Id) {
+        setPlayerNumber(1);
+        setName(player1Name);
+      } else if (playerId === player2Id) {
+        setPlayerNumber(2);
+        setName(player2Name);
+      }
+
+      SwalStart();
     } else if (message.detail === "DISCONNECT") {
       SwalDisconnectOpponent();
     } else if (message.detail === "CHAT") {
-      setChat([...chat, message.data]);
+      setChat((chat) => [
+        ...chat,
+        { user: message.data.user, text: message.data.text },
+      ]);
     }
+  };
+
+  const sendMessageChat = () => {
+    ws_game.send(
+      CreateMessageGame(gameId, { user: name, text: `${chatMessage}` }, "CHAT")
+    );
+  };
+
+  const handleChangeChatMessage = (e) => {
+    setChatMessage(e.target.value);
+  };
+
+  const Chat = () => {
+    return (
+      <Stack direction="row" ml={2} mt={3}>
+        <Grid container spacing={2} justifyContent="right">
+          <Grid item xs={4} style={{ textAlign: "left" }}>
+            <Card style={{ background: "white" }} sx={{ minWidth: 400 }}>
+              <CardContent>
+                {chat.map((message) => (
+                  <Stack direction="row" justifyContent="left" mt={0.5}>
+                    <b>{message.user}</b>: {message.text}
+                  </Stack>
+                ))}
+                <Stack direction="row" justifyContent="right" mt={0.5}>
+                  <TextField
+                    style={{ background: "white" }}
+                    label="Mensaje"
+                    onChange={handleChangeChatMessage}
+                    value={chatMessage}
+                  />
+                </Stack>
+                <button onClick={() => sendMessageChat()}>enviar</button>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Stack>
+    );
   };
 
   return (
     <main className="game">
       <h1>4 EN RAYA</h1>
-      <ConnectFourGame />
+      <Stack>
+        <ConnectFourGame />
+        {Chat()}
+      </Stack>
     </main>
   );
 }
