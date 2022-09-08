@@ -98,11 +98,13 @@ export default function Game() {
   // eslint-disable-next-line no-unused-vars
   const [name, setName] = useState(useParams().nick);
   // eslint-disable-next-line no-unused-vars
-  const [gameStatus, setGameStatus] = useState({});
+  const [board, setBoard] = useState({});
+  const [chat, setChat] = useState([]);
+  const [players, setPlayers] = useState({});
 
   useEffect(() => {
     ws_game.onopen = () => {
-      ws_game.send(CreateMessageGame(id, "", [], `ADD ME TO GAME;${name}`));
+      ws_game.send(CreateMessageGame(id, name, `ADD ME TO GAME`));
 
       ws_game.onmessage = (e) => {
         HandleMessageGame(JSON.parse(e.data));
@@ -120,40 +122,31 @@ export default function Game() {
       SwalWaiting();
     } else if (message.detail === "READY") {
       SwalStart();
-      setGameStatus(message);
+      setPlayers({
+        player1Name: message.data[0],
+        player1Id: message.data[1],
+        player2Name: message.data[2],
+        player2Id: message.data[3],
+      });
     } else if (message.detail === "DISCONNECT") {
       SwalDisconnectOpponent();
-    } else {
-      // LOGICA PASO DE MENSAJES DURANTE EL JUEGO
+    } else if (message.detail === "CHAT") {
+      setChat([...chat, message.data]);
     }
   };
 
-  //return (
-  //  <main className="game">
-  //    <h1>4 EN RAYA</h1>
-  //    <ConnectFourGame />
-  //  </main>
-  //);
-
   return (
-    <p>
-      <p>{gameStatus.gameId}</p>
-      <p>{gameStatus.player1Name}</p>
-      <p>{gameStatus.player2Name}</p>
-      <p>{gameStatus.chat}</p>
-      <p>{gameStatus.detail}</p>
-      <p>
-        <button onClick={() => ws_game.close()}>Cerrar</button>
-      </p>
-    </p>
+    <main className="game">
+      <h1>4 EN RAYA</h1>
+      <ConnectFourGame />
+    </main>
   );
 }
 
-const CreateMessageGame = (gameId, gameBoard, chat, detail) => {
+const CreateMessageGame = (gameId, data, detail) => {
   return JSON.stringify({
     gameId: gameId,
-    gameBoard: gameBoard,
-    chat: chat,
+    data: data,
     detail: detail,
   });
 };
