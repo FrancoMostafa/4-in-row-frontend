@@ -21,7 +21,7 @@ export default function Home() {
   };
 
   return (
-    <Stack direction="column" ml={2} mt={12} justifyContent="center">
+    <Stack direction="column" mt={12} justifyContent="center">
       <Grid container spacing={2} justifyContent="center">
         <Grid item xs={4} style={{ textAlign: "center" }}>
           <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>

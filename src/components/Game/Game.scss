@@ -18,7 +18,7 @@
     box-sizing: border-box;
     border-radius: 50%;
     margin: 4px;
-    //border: 5px solid navy
+    cursor: pointer;
 }
 
 .board {
@@ -30,6 +30,7 @@
     margin: auto;
     padding: 8px;
     border-style: groove;
+    border-width: 6px;
     border-radius: 1%;
 }
 
@@ -39,7 +40,7 @@
     height: calc(700px / 7 - 8px);
     display: inline-block;
     box-sizing: border-box;
-    border-radius: 50%;
+    border-radius: 50%;    
 }
   
 .rojo {
@@ -48,7 +49,7 @@
     height: calc(700px / 7 - 8px);
     display: inline-block;
     box-sizing: border-box;
-    border-radius: 50%;
+    border-radius: 50%;    
 }
 
 .game {

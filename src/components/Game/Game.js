@@ -4,92 +4,14 @@ import React, { useState, useEffect } from "react";
 import "./Game.scss";
 import { Stack, Grid, Card, CardContent, TextField } from "@mui/material";
 
-const GameColumn = ({ col, idx, onClick }) => {
-  return (
-    <div className="column" key={`col-${idx}`} onClick={onClick}>
-      {col.map((cell, x) => {
-        return (
-          <span className="cell" key={`cell-${idx}-${x}`}>
-            {cell}
-          </span>
-        );
-      })}
-    </div>
-  );
-};
-
-const Red_piece = () => {
-  return <div className="rojo"></div>;
-};
-
-const Yellow_piece = () => {
-  return <div className="amarillo"></div>;
-};
-
-const ConnectFourGame = () => {
-  let initial = {};
-  for (var c = 0; c < 7; c++) {
-    initial[c] = [null, null, null, null, null, null];
-  }
-  const [gameState, setGameState] = useState(initial);
-  const [currentPlayer, setCurrentPlayer] = useState(Yellow_piece);
-
-  const gameOver = () => {
-    // game over vertical:
-    for (let c = 0; c < 7; c++) {
-      for (let r = 0; r < 6 - 3; r++) {
-        if (
-          gameState[c][r] !== null &&
-          gameState[c][r] === gameState[c][r + 1] &&
-          gameState[c][r + 1] === gameState[c][r + 2] &&
-          gameState[c][r + 2] === gameState[c][r + 3]
-        ) {
-          return true;
-        }
-      }
-    }
-
-    // game over horizontal:
-    for (let c = 0; c < 7 - 3; c++) {
-      for (let r = 0; r < 6; r++) {
-        if (
-          gameState[c][r] !== null &&
-          gameState[c][r] === gameState[c][r + 1] &&
-          gameState[c + 1][r] === gameState[c + 2][r] &&
-          gameState[c + 2][r] === gameState[c + 3][r]
-        ) {
-          return true;
-        }
-      }
-    }
-  };
-
-  const addPiece = (columnIdx) => {
-    console.log(columnIdx);
-    const column = gameState[columnIdx];
-    const piecePos = column.indexOf(null);
-    column[piecePos] = currentPlayer;
-    setGameState({
-      ...gameState,
-      [columnIdx]: column,
-    });
-
-    if (gameOver()) {
-      alert("GAME OVER");
-    }
-    setCurrentPlayer(currentPlayer === Red_piece ? Yellow_piece : Red_piece);
-  };
-
-  return (
-    <div className="board">
-      {Object.entries(gameState).map(([k, col], x) => {
-        return <GameColumn col={col} idx={x} onClick={() => addPiece(x)} />;
-      })}
-    </div>
-  );
-};
-
 const URL_GAME = "ws://localhost:8080/ws_game";
+
+let initial = {};
+for (var c = 0; c < 7; c++) {
+  initial[c] = [null, null, null, null, null, null];
+}
+
+const playerId = (Math.random() + 1).toString(36).substring(7);
 
 export default function Game() {
   // eslint-disable-next-line no-unused-vars
@@ -99,17 +21,14 @@ export default function Game() {
   const [name, setName] = useState(useParams().nick);
   // eslint-disable-next-line no-unused-vars
   const [gameId, setGameId] = useState(useParams().gameId);
-  const [board, setBoard] = useState({});
+  const [board, setBoard] = useState(initial);
   const [chat, setChat] = useState([]);
   const [chatMessage, setChatMessage] = useState("");
   const [players, setPlayers] = useState({});
-  const [playerId, setPlayerId] = useState("");
   const [playerNumber, setPlayerNumber] = useState(0);
 
   useEffect(() => {
     ws_game.onopen = () => {
-      const playerId = (Math.random() + 1).toString(36).substring(7);
-      setPlayerId(playerId);
       ws_game.send(
         CreateMessageGame(gameId, `${name};${playerId}`, `ADD ME TO GAME`)
       );
@@ -140,6 +59,10 @@ export default function Game() {
         player2Name: player2Name,
         player2Id: player2Id,
       });
+
+      console.log(playerId);
+      console.log(player1Id);
+      console.log(player2Id);
 
       if (playerId === player1Id) {
         setPlayerNumber(1);
@@ -199,11 +122,91 @@ export default function Game() {
     );
   };
 
+  // Connect Four Game
+
+  const GameColumn = ({ col, idx, onClick }) => {
+    return (
+      <div className="column" key={`col-${idx}`} onClick={onClick}>
+        {col.map((cell, x) => {
+          return (
+            <span className="cell" key={`cell-${idx}-${x}`}>
+              {cell}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const ConnectFourGame = () => {
+    const gameOver = () => {
+      // game over vertical:
+      for (let c = 0; c < 7; c++) {
+        for (let r = 0; r < 6 - 3; r++) {
+          if (
+            board[c][r] !== null &&
+            board[c][r] === board[c][r + 1] &&
+            board[c][r + 1] === board[c][r + 2] &&
+            board[c][r + 2] === board[c][r + 3]
+          ) {
+            return true;
+          }
+        }
+      }
+
+      // game over horizontal:
+      for (let c = 0; c < 7 - 3; c++) {
+        for (let r = 0; r < 6; r++) {
+          if (
+            board[c][r] !== null &&
+            board[c][r] === board[c][r + 1] &&
+            board[c + 1][r] === board[c + 2][r] &&
+            board[c + 2][r] === board[c + 3][r]
+          ) {
+            return true;
+          }
+        }
+      }
+    };
+
+    const addPiece = (columnIdx) => {
+      //console.log(columnIdx);
+      const column = board[columnIdx];
+      const piecePos = column.indexOf(null);
+      let piece;
+      const red_piece = <div className="rojo"></div>;
+      const yellow_piece = <div className="amarillo"></div>;
+
+      if (playerNumber === 1) {
+        piece = red_piece;
+      } else {
+        piece = yellow_piece;
+      }
+      column[piecePos] = piece;
+      setBoard({
+        ...board,
+        [columnIdx]: column,
+      });
+
+      if (gameOver()) {
+        alert("GAME OVER");
+      }
+    };
+
+    return (
+      <div className="board">
+        {Object.entries(board).map(([k, col], x) => {
+          return <GameColumn col={col} idx={x} onClick={() => addPiece(x)} />;
+        })}
+      </div>
+    );
+  };
+
   return (
     <main className="game">
       <h1>4 EN RAYA</h1>
       <Stack>
-        <ConnectFourGame />
+        {ConnectFourGame()}
         {Chat()}
       </Stack>
     </main>
