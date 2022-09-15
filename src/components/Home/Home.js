@@ -17,7 +17,9 @@ export default function Home() {
   const [nick, setNick] = useState("");
 
   const handleChangeNick = (e) => {
-    setNick(e.target.value);
+    if (!(e.target.value.includes("/") || e.target.value.includes("\\"))) {
+      setNick(e.target.value);
+    }
   };
 
   return (
