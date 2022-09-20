@@ -158,7 +158,6 @@ export default function Game() {
   };
 
   const gameOver = () => {
-    console.log(board);
     const isYellow = (piece) => {
       return piece !== null && piece.props.className === "amarillo";
     };
@@ -166,8 +165,8 @@ export default function Game() {
       return piece !== null && piece.props.className === "rojo";
     };
     // game over vertical:
-    for (let c = 0; c < 7; c++) {
-      for (let r = 0; r < 6 - 3; r++) {
+    for (let c = 0; c <= 6; c++) {
+      for (let r = 0; r <= 2; r++) {
         if (
           (isRed(board[c][r]) &&
             isRed(board[c][r + 1]) &&
@@ -184,22 +183,91 @@ export default function Game() {
     }
 
     // game over horizontal:
-    for (let c = 0; c < 7 - 3; c++) {
-      for (let r = 0; r < 6 - 3; r++) {
+    for (let c = 0; c <= 3; c++) {
+      for (let r = 0; r <= 5; r++) {
         if (
           (isRed(board[c][r]) &&
-            isRed(board[c][r + 1]) &&
-            isRed(board[c][r + 2]) &&
-            isRed(board[c][r + 3])) ||
+            isRed(board[c + 1][r]) &&
+            isRed(board[c + 2][r]) &&
+            isRed(board[c + 3][r])) ||
           (isYellow(board[c][r]) &&
-            isYellow(board[c][r + 1]) &&
-            isYellow(board[c][r + 2]) &&
-            isYellow(board[c][r + 3]))
+            isYellow(board[c + 1][r]) &&
+            isYellow(board[c + 2][r]) &&
+            isYellow(board[c + 3][r]))
         ) {
           return true;
         }
       }
     }
+
+    // game over diagonal:
+    for (let c = 0; c <= 6; c++) {
+      for (let r = 0; r <= 5; r++) {
+        let diagonalEvaluate1 = false;
+        let diagonalEvaluate2 = false;
+        let diagonalEvaluate3 = false;
+        let diagonalEvaluate4 = false;
+
+        if (c >= 3 && r >= 3) {
+          diagonalEvaluate1 =
+            (isRed(board[c][r]) &&
+              isRed(board[c - 1][r - 1]) &&
+              isRed(board[c - 2][r - 2]) &&
+              isRed(board[c - 3][r - 3])) ||
+            (isYellow(board[c][r]) &&
+              isYellow(board[c - 1][r - 1]) &&
+              isYellow(board[c - 2][r - 2]) &&
+              isYellow(board[c - 3][r - 3]));
+        }
+
+        if (c >= 3 && r <= 3) {
+          diagonalEvaluate2 =
+            (isRed(board[c][r]) &&
+              isRed(board[c - 1][r + 1]) &&
+              isRed(board[c - 2][r + 2]) &&
+              isRed(board[c - 3][r + 3])) ||
+            (isYellow(board[c][r]) &&
+              isYellow(board[c - 1][r + 1]) &&
+              isYellow(board[c - 2][r + 2]) &&
+              isYellow(board[c - 3][r + 3]));
+        }
+
+        if (c <= 3 && r <= 3) {
+          diagonalEvaluate4 =
+            (isRed(board[c][r]) &&
+              isRed(board[c + 1][r + 1]) &&
+              isRed(board[c + 2][r + 2]) &&
+              isRed(board[c + 3][r + 3])) ||
+            (isYellow(board[c][r]) &&
+              isYellow(board[c + 1][r + 1]) &&
+              isYellow(board[c + 2][r + 2]) &&
+              isYellow(board[c + 3][r + 3]));
+        }
+
+        if (c <= 3 && r >= 3) {
+          diagonalEvaluate4 =
+            (isRed(board[c][r]) &&
+              isRed(board[c + 1][r - 1]) &&
+              isRed(board[c + 2][r - 2]) &&
+              isRed(board[c + 3][r - 3])) ||
+            (isYellow(board[c][r]) &&
+              isYellow(board[c + 1][r - 1]) &&
+              isYellow(board[c + 2][r - 2]) &&
+              isYellow(board[c + 3][r - 3]));
+        }
+
+        if (
+          diagonalEvaluate1 ||
+          diagonalEvaluate2 ||
+          diagonalEvaluate3 ||
+          diagonalEvaluate4
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   };
 
   const sendMove = (columnIdx, pNro, t) => {
@@ -226,7 +294,6 @@ export default function Game() {
       ...board,
       [columnIdx]: column,
     });
-    console.log(piece.props.className);
   };
 
   const ConnectFourGame = () => {
