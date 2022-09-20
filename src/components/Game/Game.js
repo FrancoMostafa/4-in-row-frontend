@@ -203,13 +203,8 @@ export default function Game() {
     // game over diagonal:
     for (let c = 0; c <= 6; c++) {
       for (let r = 0; r <= 5; r++) {
-        let diagonalEvaluate1 = false;
-        let diagonalEvaluate2 = false;
-        let diagonalEvaluate3 = false;
-        let diagonalEvaluate4 = false;
-
         if (c >= 3 && r >= 3) {
-          diagonalEvaluate1 =
+          if (
             (isRed(board[c][r]) &&
               isRed(board[c - 1][r - 1]) &&
               isRed(board[c - 2][r - 2]) &&
@@ -217,11 +212,14 @@ export default function Game() {
             (isYellow(board[c][r]) &&
               isYellow(board[c - 1][r - 1]) &&
               isYellow(board[c - 2][r - 2]) &&
-              isYellow(board[c - 3][r - 3]));
+              isYellow(board[c - 3][r - 3]))
+          ) {
+            return true;
+          }
         }
 
         if (c >= 3 && r <= 3) {
-          diagonalEvaluate2 =
+          if (
             (isRed(board[c][r]) &&
               isRed(board[c - 1][r + 1]) &&
               isRed(board[c - 2][r + 2]) &&
@@ -229,11 +227,14 @@ export default function Game() {
             (isYellow(board[c][r]) &&
               isYellow(board[c - 1][r + 1]) &&
               isYellow(board[c - 2][r + 2]) &&
-              isYellow(board[c - 3][r + 3]));
+              isYellow(board[c - 3][r + 3]))
+          ) {
+            return true;
+          }
         }
 
         if (c <= 3 && r <= 3) {
-          diagonalEvaluate4 =
+          if (
             (isRed(board[c][r]) &&
               isRed(board[c + 1][r + 1]) &&
               isRed(board[c + 2][r + 2]) &&
@@ -241,11 +242,14 @@ export default function Game() {
             (isYellow(board[c][r]) &&
               isYellow(board[c + 1][r + 1]) &&
               isYellow(board[c + 2][r + 2]) &&
-              isYellow(board[c + 3][r + 3]));
+              isYellow(board[c + 3][r + 3]))
+          ) {
+            return true;
+          }
         }
 
         if (c <= 3 && r >= 3) {
-          diagonalEvaluate4 =
+          if (
             (isRed(board[c][r]) &&
               isRed(board[c + 1][r - 1]) &&
               isRed(board[c + 2][r - 2]) &&
@@ -253,16 +257,10 @@ export default function Game() {
             (isYellow(board[c][r]) &&
               isYellow(board[c + 1][r - 1]) &&
               isYellow(board[c + 2][r - 2]) &&
-              isYellow(board[c + 3][r - 3]));
-        }
-
-        if (
-          diagonalEvaluate1 ||
-          diagonalEvaluate2 ||
-          diagonalEvaluate3 ||
-          diagonalEvaluate4
-        ) {
-          return true;
+              isYellow(board[c + 3][r - 3]))
+          ) {
+            return true;
+          }
         }
       }
     }
