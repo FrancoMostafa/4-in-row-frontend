@@ -26,8 +26,9 @@ export default function Game() {
   const [board, setBoard] = useState(initial);
   const [chat, setChat] = useState([]);
   const [chatMessage, setChatMessage] = useState("");
+  const [turn, setTurn] = useState(null);
   const [players, setPlayers] = useState({});
-  const [playerNumber, setPlayerNumber] = useState(0);
+  const [playerNumber, setPlayerNumber] = useState(null);
 
   useEffect(() => {
     ws_game.onopen = () => {
@@ -44,7 +45,7 @@ export default function Game() {
       };
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
 
   const HandleMessageGame = (message) => {
     if (message.detail === "WAITING") {
@@ -54,17 +55,16 @@ export default function Game() {
       const player1Id = message.data[0].split(";")[1];
       const player2Name = message.data[1].split(";")[0];
       const player2Id = message.data[1].split(";")[1];
+      const initialTurn = message.data[2];
 
       setPlayers({
         player1Name: player1Name,
         player1Id: player1Id,
+        player1Wins: 0,
         player2Name: player2Name,
         player2Id: player2Id,
+        player2Wins: 0,
       });
-
-      console.log(playerId);
-      console.log(player1Id);
-      console.log(player2Id);
 
       if (playerId === player1Id) {
         setPlayerNumber(1);
@@ -74,6 +74,8 @@ export default function Game() {
         setName(player2Name);
       }
 
+      initTurn(initialTurn);
+
       SwalStart();
     } else if (message.detail === "DISCONNECT") {
       SwalDisconnectOpponent();
@@ -82,7 +84,41 @@ export default function Game() {
         ...chat,
         { user: message.data.user, text: message.data.text },
       ]);
+    } else if (message.detail === "MOVE") {
+      const pieceData = message.data[0];
+      const playerNumberData = message.data[1];
+      const turnData = message.data[2];
+      let playersData = message.data[3];
+      addPiece(pieceData, playerNumberData);
+      const roundResult = roundOver();
+      if (roundResult[0]) {
+        SwalRoundWinner(
+          roundResult[1],
+          message.data[3].player1Name,
+          message.data[3].player2Name
+        );
+        playersData = addWinToPlayer(roundResult[1], playersData);
+        resetBoard();
+      }
+      if (playersData.player1Wins === 3) {
+        SwalPlayerWinner(playersData.player1Name);
+      } else if (playersData.player2Wins === 3) {
+        SwalPlayerWinner(playersData.player2Name);
+      }
+      changeTurn(turnData);
     }
+  };
+
+  const changeTurn = (t) => {
+    if (t === 1) {
+      setTurn(2);
+    } else {
+      setTurn(1);
+    }
+  };
+
+  const initTurn = (initial) => {
+    setTurn(initial);
   };
 
   const sendMessageChat = () => {
@@ -157,65 +193,213 @@ export default function Game() {
     );
   };
 
+  const roundOver = () => {
+    const isYellow = (piece) => {
+      return piece !== null && piece.props.className === "amarillo";
+    };
+    const isRed = (piece) => {
+      return piece !== null && piece.props.className === "rojo";
+    };
+    // game over vertical:
+    for (let c = 0; c <= 6; c++) {
+      for (let r = 0; r <= 2; r++) {
+        if (
+          isRed(board[c][r]) &&
+          isRed(board[c][r + 1]) &&
+          isRed(board[c][r + 2]) &&
+          isRed(board[c][r + 3])
+        ) {
+          return [true, "rojo"];
+        }
+        if (
+          isYellow(board[c][r]) &&
+          isYellow(board[c][r + 1]) &&
+          isYellow(board[c][r + 2]) &&
+          isYellow(board[c][r + 3])
+        ) {
+          return [true, "amarillo"];
+        }
+      }
+    }
+
+    // game over horizontal:
+    for (let c = 0; c <= 3; c++) {
+      for (let r = 0; r <= 5; r++) {
+        if (
+          isRed(board[c][r]) &&
+          isRed(board[c + 1][r]) &&
+          isRed(board[c + 2][r]) &&
+          isRed(board[c + 3][r])
+        ) {
+          return [true, "rojo"];
+        }
+        if (
+          isYellow(board[c][r]) &&
+          isYellow(board[c + 1][r]) &&
+          isYellow(board[c + 2][r]) &&
+          isYellow(board[c + 3][r])
+        ) {
+          return [true, "amarillo"];
+        }
+      }
+    }
+
+    // game over diagonal:
+    for (let c = 0; c <= 6; c++) {
+      for (let r = 0; r <= 5; r++) {
+        if (c >= 3 && r >= 3) {
+          if (
+            isRed(board[c][r]) &&
+            isRed(board[c - 1][r - 1]) &&
+            isRed(board[c - 2][r - 2]) &&
+            isRed(board[c - 3][r - 3])
+          ) {
+            return [true, "rojo"];
+          }
+          if (
+            isYellow(board[c][r]) &&
+            isYellow(board[c - 1][r - 1]) &&
+            isYellow(board[c - 2][r - 2]) &&
+            isYellow(board[c - 3][r - 3])
+          ) {
+            return [true, "amarillo"];
+          }
+        }
+
+        if (c >= 3 && r <= 3) {
+          if (
+            isRed(board[c][r]) &&
+            isRed(board[c - 1][r + 1]) &&
+            isRed(board[c - 2][r + 2]) &&
+            isRed(board[c - 3][r + 3])
+          ) {
+            return [true, "rojo"];
+          }
+          if (
+            isYellow(board[c][r]) &&
+            isYellow(board[c - 1][r + 1]) &&
+            isYellow(board[c - 2][r + 2]) &&
+            isYellow(board[c - 3][r + 3])
+          ) {
+            return [true, "amarillo"];
+          }
+        }
+
+        if (c <= 3 && r <= 3) {
+          if (
+            isRed(board[c][r]) &&
+            isRed(board[c + 1][r + 1]) &&
+            isRed(board[c + 2][r + 2]) &&
+            isRed(board[c + 3][r + 3])
+          ) {
+            return [true, "rojo"];
+          }
+          if (
+            isYellow(board[c][r]) &&
+            isYellow(board[c + 1][r + 1]) &&
+            isYellow(board[c + 2][r + 2]) &&
+            isYellow(board[c + 3][r + 3])
+          ) {
+            return [true, "amarillo"];
+          }
+        }
+
+        if (c <= 3 && r >= 3) {
+          if (
+            isRed(board[c][r]) &&
+            isRed(board[c + 1][r - 1]) &&
+            isRed(board[c + 2][r - 2]) &&
+            isRed(board[c + 3][r - 3])
+          ) {
+            return [true, "rojo"];
+          }
+          if (
+            isYellow(board[c][r]) &&
+            isYellow(board[c + 1][r - 1]) &&
+            isYellow(board[c + 2][r - 2]) &&
+            isYellow(board[c + 3][r - 3])
+          ) {
+            return [true, "amarillo"];
+          }
+        }
+      }
+    }
+
+    return [false, null];
+  };
+
+  const sendMove = (columnIdx, pNro, t, p) => {
+    if (pNro === t) {
+      changeTurn(t);
+      ws_game.send(CreateMessageGame(gameId, [columnIdx, pNro, t, p], "MOVE"));
+    }
+  };
+
+  const addPiece = (columnIdx, pNro) => {
+    const column = board[columnIdx];
+    const piecePos = column.indexOf(null);
+    let piece;
+    const red_piece = <div className="rojo"></div>;
+    const yellow_piece = <div className="amarillo"></div>;
+
+    if (pNro === 1) {
+      piece = red_piece;
+    } else if (pNro === 2) {
+      piece = yellow_piece;
+    }
+    column[piecePos] = piece;
+    setBoard({
+      ...board,
+      [columnIdx]: column,
+    });
+  };
+
+  const resetBoard = () => {
+    for (let c = 0; c <= 6; c++) {
+      for (let r = 0; r <= 5; r++) {
+        const column = board[c];
+        column[r] = null;
+        setBoard({ ...board, [r]: column });
+      }
+    }
+  };
+
+  const addWinToPlayer = (winnerColor, p) => {
+    let newPlayersData = {};
+    if (winnerColor === "rojo") {
+      newPlayersData = {
+        player1Name: p.player1Name,
+        player1Id: p.player1Id,
+        player1Wins: p.player1Wins + 1,
+        player2Name: p.player2Name,
+        player2Id: p.player2Id,
+        player2Wins: p.player2Wins,
+      };
+    } else {
+      newPlayersData = {
+        player1Name: p.player1Name,
+        player1Id: p.player1Id,
+        player1Wins: p.player1Wins,
+        player2Name: p.player2Name,
+        player2Id: p.player2Id,
+        player2Wins: p.player2Wins + 1,
+      };
+    }
+    setPlayers(newPlayersData);
+    return newPlayersData;
+  };
+
   const ConnectFourGame = () => {
-    const gameOver = () => {
-      // game over vertical:
-      for (let c = 0; c < 7; c++) {
-        for (let r = 0; r < 6 - 3; r++) {
-          if (
-            board[c][r] !== null &&
-            board[c][r] === board[c][r + 1] &&
-            board[c][r + 1] === board[c][r + 2] &&
-            board[c][r + 2] === board[c][r + 3]
-          ) {
-            return true;
-          }
-        }
-      }
-
-      // game over horizontal:
-      for (let c = 0; c < 7 - 3; c++) {
-        for (let r = 0; r < 6; r++) {
-          if (
-            board[c][r] !== null &&
-            board[c][r] === board[c][r + 1] &&
-            board[c + 1][r] === board[c + 2][r] &&
-            board[c + 2][r] === board[c + 3][r]
-          ) {
-            return true;
-          }
-        }
-      }
-    };
-
-    const addPiece = (columnIdx) => {
-      //console.log(columnIdx);
-      const column = board[columnIdx];
-      const piecePos = column.indexOf(null);
-      let piece;
-      const red_piece = <div className="rojo"></div>;
-      const yellow_piece = <div className="amarillo"></div>;
-
-      if (playerNumber === 1) {
-        piece = red_piece;
-      } else {
-        piece = yellow_piece;
-      }
-      column[piecePos] = piece;
-      setBoard({
-        ...board,
-        [columnIdx]: column,
-      });
-
-      if (gameOver()) {
-        alert("GAME OVER");
-      }
-    };
-
     return (
       <div className="board">
         {Object.entries(board).map(([k, col], x) => {
-          return <GameColumn col={col} idx={x} onClick={() => addPiece(x)} />;
+          return (
+            <GameColumn
+              col={col}
+              idx={x}
+              onClick={() => sendMove(x, playerNumber, turn, players)}
+            />
+          );
         })}
       </div>
     );
@@ -318,6 +502,48 @@ const SwalDisconnectOpponent = () => {
   return Swal.fire({
     icon: "error",
     title: "Tu oponente se ha desconectado",
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 5000,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      window.location = window.location.origin;
+    }
+  });
+};
+
+const SwalRoundWinner = (winnerColor, p1Name, p2Name) => {
+  let winnerRoundName;
+  if (winnerColor === "rojo") {
+    winnerRoundName = p1Name;
+  } else {
+    winnerRoundName = p2Name;
+  }
+  return Swal.fire({
+    title: `${winnerRoundName} gana la ronda!`,
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 5000,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  });
+};
+
+const SwalPlayerWinner = (pName) => {
+  return Swal.fire({
+    title: `${pName} gana la partida!`,
     heightAuto: false,
     allowOutsideClick: false,
     showCancelButton: false,
