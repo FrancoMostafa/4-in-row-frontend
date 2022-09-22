@@ -43,18 +43,7 @@ export default function Game() {
       };
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    ws_game.onmessage,
-    ws_game.onopen,
-    ws_game.onclose,
-    name,
-    gameId,
-    board,
-    chat,
-    players,
-    turn,
-    playerNumber,
-  ]);
+  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
 
   const HandleMessageGame = (message) => {
     if (message.detail === "WAITING") {
@@ -69,8 +58,10 @@ export default function Game() {
       setPlayers({
         player1Name: player1Name,
         player1Id: player1Id,
+        player1Wins: 0,
         player2Name: player2Name,
         player2Id: player2Id,
+        player2Wins: 0,
       });
 
       if (playerId === player1Id) {
@@ -92,7 +83,11 @@ export default function Game() {
         { user: message.data.user, text: message.data.text },
       ]);
     } else if (message.detail === "MOVE") {
-      addPiece(message.data[0], message.data[1]);
+      const pieceData = message.data[0];
+      const playerNumberData = message.data[1];
+      const turnData = message.data[2];
+      let playersData = message.data[3];
+      addPiece(pieceData, playerNumberData);
       const roundResult = roundOver();
       if (roundResult[0]) {
         SwalRoundWinner(
@@ -100,9 +95,15 @@ export default function Game() {
           message.data[3].player1Name,
           message.data[3].player2Name
         );
+        playersData = addWinToPlayer(roundResult[1], playersData);
         resetBoard();
       }
-      changeTurn(message.data[2]);
+      if (playersData.player1Wins === 3) {
+        SwalPlayerWinner(playersData.player1Name);
+      } else if (playersData.player2Wins === 3) {
+        SwalPlayerWinner(playersData.player2Name);
+      }
+      changeTurn(turnData);
     }
   };
 
@@ -344,6 +345,31 @@ export default function Game() {
     }
   };
 
+  const addWinToPlayer = (winnerColor, p) => {
+    let newPlayersData = {};
+    if (winnerColor === "rojo") {
+      newPlayersData = {
+        player1Name: p.player1Name,
+        player1Id: p.player1Id,
+        player1Wins: p.player1Wins + 1,
+        player2Name: p.player2Name,
+        player2Id: p.player2Id,
+        player2Wins: p.player2Wins,
+      };
+    } else {
+      newPlayersData = {
+        player1Name: p.player1Name,
+        player1Id: p.player1Id,
+        player1Wins: p.player1Wins,
+        player2Name: p.player2Name,
+        player2Id: p.player2Id,
+        player2Wins: p.player2Wins + 1,
+      };
+    }
+    setPlayers(newPlayersData);
+    return newPlayersData;
+  };
+
   const ConnectFourGame = () => {
     return (
       <div className="board">
@@ -475,5 +501,25 @@ const SwalRoundWinner = (winnerColor, p1Name, p2Name) => {
     left top
     no-repeat
   `,
+  });
+};
+
+const SwalPlayerWinner = (pName) => {
+  return Swal.fire({
+    title: `${pName} gana la partida!`,
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 5000,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      window.location = window.location.origin;
+    }
   });
 };
