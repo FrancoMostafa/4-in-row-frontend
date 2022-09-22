@@ -91,9 +91,11 @@ export default function Game() {
       let playersData = message.data[3];
       addPiece(pieceData, playerNumberData);
       const roundResult = roundOver();
-      if (roundResult[0]) {
-        playersData = addWinToPlayer(roundResult[1], playersData);
-        SwalRoundWinner(roundResult[1], playersData);
+      const roundResultEvaluate = roundResult[0];
+      const roundResultColorWin = roundResult[1];
+      if (roundResultEvaluate) {
+        playersData = addWinToPlayer(roundResultColorWin, playersData);
+        SwalRoundWinner(roundResultColorWin, playersData);
         resetBoard();
       }
       changeTurn(turnData);
