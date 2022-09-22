@@ -3,6 +3,8 @@ import Swal from "sweetalert2";
 import React, { useState, useEffect } from "react";
 import "./Game.scss";
 import { Stack, Grid, Card, CardContent, TextField } from "@mui/material";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
 
 const URL_GAME = "ws://localhost:8080/ws_game";
 
@@ -87,36 +89,53 @@ export default function Game() {
     ws_game.send(
       CreateMessageGame(gameId, { user: name, text: `${chatMessage}` }, "CHAT")
     );
+    setChatMessage("");
   };
 
   const handleChangeChatMessage = (e) => {
     setChatMessage(e.target.value);
   };
 
+  const handleKeypress = (e) => {
+    if (e.key === "Enter") {
+      sendMessageChat();
+    }
+  };
+
   const Chat = () => {
     return (
-      <Stack direction="row" ml={2} mt={3}>
-        <Grid container spacing={2} justifyContent="right">
-          <Grid item xs={4} style={{ textAlign: "left" }}>
-            <Card style={{ background: "white" }} sx={{ minWidth: 400 }}>
-              <CardContent>
-                {chat.map((message) => (
-                  <Stack direction="row" justifyContent="left" mt={0.5}>
-                    <b>{message.user}</b>: {message.text}
-                  </Stack>
-                ))}
-                <Stack direction="row" justifyContent="right" mt={0.5}>
-                  <TextField
-                    style={{ background: "white" }}
-                    label="Mensaje"
-                    onChange={handleChangeChatMessage}
-                    value={chatMessage}
-                  />
+      <Stack direction="row" justifyContent="left" ml={156}>
+        <Grid
+          style={{ textAlign: "left" }}
+          sx={{
+            width: "100%",
+            maxWidth: 275,
+            bgcolor: "background.paper",
+            position: "relative",
+            overflow: "auto",
+            maxHeight: 300,
+            "& ul": { padding: 0 },
+          }}
+        >
+          <Card style={{ background: "white" }} sx={8} md={4}>
+            <CardContent>
+              {chat.map((message) => (
+                <Stack direction="row" justifyContent="left" mt={0.5}>
+                  <b>{message.user}</b>: {message.text}
                 </Stack>
-                <button onClick={() => sendMessageChat()}>enviar</button>
-              </CardContent>
-            </Card>
-          </Grid>
+              ))}
+              <Stack direction="row" justifyContent="left" mt={2}>
+                <TextField
+                  style={{ background: "white" }}
+                  label="Mensaje"
+                  onChange={handleChangeChatMessage}
+                  onKeyPress={handleKeypress}
+                  value={chatMessage}
+                />
+              </Stack>
+              <button onClick={() => sendMessageChat()}>enviar</button>
+            </CardContent>
+          </Card>
         </Grid>
       </Stack>
     );
@@ -205,10 +224,28 @@ export default function Game() {
   return (
     <main className="game">
       <h1>4 EN RAYA</h1>
-      <Stack>
-        {ConnectFourGame()}
-        {Chat()}
-      </Stack>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          "& > :not(style)": {
+            m: 0.4,
+            width: 310,
+            height: 310,
+          },
+        }}
+      >
+        <div>
+          <Paper>
+            <h3>player1Name</h3>
+          </Paper>
+          <Paper>
+            <h3>player2Name</h3>
+          </Paper>
+        </div>
+        <Paper>{ConnectFourGame()}</Paper>
+      </Box>
+      {Chat()}
     </main>
   );
 }
