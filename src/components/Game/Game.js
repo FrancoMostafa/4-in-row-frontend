@@ -153,25 +153,41 @@ export default function Game() {
             "& ul": { padding: 0 },
           }}
         >
-          <Card style={{ background: "white" }} sx={8} md={4}>
-            <CardContent>
-              {chat.map((message) => (
-                <Stack direction="row" justifyContent="left" mt={0.5}>
-                  <b>{message.user}</b>: {message.text}
+          <div className="chat">
+            <Card style={{ background: "white" }} sx={8} md={4}>
+              <CardContent>
+                {chat.map((message) => (
+                  <Stack direction="row" justifyContent="left" mt={0.5}>
+                    <b>{message.user}</b>: {message.text}
+                  </Stack>
+                ))}
+                <Stack direction="row" justifyContent="left" mt={2}>
+                  <TextField
+                    style={{ background: "white" }}
+                    label="Mensaje"
+                    onChange={handleChangeChatMessage}
+                    onKeyPress={handleKeypress}
+                    value={chatMessage}
+                  />
                 </Stack>
-              ))}
-              <Stack direction="row" justifyContent="left" mt={2}>
-                <TextField
-                  style={{ background: "white" }}
-                  label="Mensaje"
-                  onChange={handleChangeChatMessage}
-                  onKeyPress={handleKeypress}
-                  value={chatMessage}
-                />
-              </Stack>
-              <button onClick={() => sendMessageChat()}>enviar</button>
-            </CardContent>
-          </Card>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  mt={1}
+                  mb={0.01}
+                  onClick={() => sendMessageChat()}
+                >
+                  <button
+                    variant="outlined"
+                    size="large"
+                    style={{ background: "rgb(178, 178, 246)" }}
+                  >
+                    enviar
+                  </button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </div>
         </Grid>
       </Stack>
     );
@@ -407,7 +423,10 @@ export default function Game() {
 
   return (
     <main className="game">
-      <h1>4 EN RAYA</h1>
+      <Paper>
+        <h1>4 EN RAYA</h1>
+      </Paper>
+
       <Box
         sx={{
           display: "flex",
