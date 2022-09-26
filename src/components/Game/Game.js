@@ -91,19 +91,12 @@ export default function Game() {
       let playersData = message.data[3];
       addPiece(pieceData, playerNumberData);
       const roundResult = roundOver();
-      if (roundResult[0]) {
-        SwalRoundWinner(
-          roundResult[1],
-          message.data[3].player1Name,
-          message.data[3].player2Name
-        );
-        playersData = addWinToPlayer(roundResult[1], playersData);
+      const roundResultEvaluate = roundResult[0];
+      const roundResultColorWin = roundResult[1];
+      if (roundResultEvaluate) {
+        playersData = addWinToPlayer(roundResultColorWin, playersData);
+        SwalRoundWinner(roundResultColorWin, playersData);
         resetBoard();
-      }
-      if (playersData.player1Wins === 3) {
-        SwalPlayerWinner(playersData.player1Name);
-      } else if (playersData.player2Wins === 3) {
-        SwalPlayerWinner(playersData.player2Name);
       }
       changeTurn(turnData);
     }
@@ -538,12 +531,12 @@ const SwalDisconnectOpponent = () => {
   });
 };
 
-const SwalRoundWinner = (winnerColor, p1Name, p2Name) => {
+const SwalRoundWinner = (winnerColor, pData) => {
   let winnerRoundName;
   if (winnerColor === "rojo") {
-    winnerRoundName = p1Name;
+    winnerRoundName = pData.player1Name;
   } else {
-    winnerRoundName = p2Name;
+    winnerRoundName = pData.player2Name;
   }
   return Swal.fire({
     title: `${winnerRoundName} gana la ronda!`,
@@ -557,6 +550,12 @@ const SwalRoundWinner = (winnerColor, p1Name, p2Name) => {
     left top
     no-repeat
   `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      if (pData.player1Wins === 3 || pData.player2Wins === 3) {
+        SwalPlayerWinner(winnerRoundName);
+      }
+    }
   });
 };
 
