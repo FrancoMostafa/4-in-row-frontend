@@ -526,7 +526,7 @@ const SwalStart = () => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 3000,
+    timer: 5000,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
