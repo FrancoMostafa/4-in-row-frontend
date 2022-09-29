@@ -21,11 +21,11 @@ for (var c = 0; c < 7; c++) {
 }
 
 const playerId = (Math.random() + 1).toString(36).substring(7);
+let rematchConfirm = false;
 
 export default function Game() {
   // eslint-disable-next-line no-unused-vars
   const [ws_game, setWs_game] = useState(new WebSocket(URL_GAME));
-  // eslint-disable-next-line no-unused-vars
   // eslint-disable-next-line no-unused-vars
   const [name, setName] = useState(useParams().nick);
   // eslint-disable-next-line no-unused-vars
@@ -87,10 +87,9 @@ export default function Game() {
     } else if (message.detail === "DISCONNECT") {
       SwalDisconnectOpponent();
     } else if (message.detail === "CHAT") {
-      setChat((chat) => [
-        ...chat,
-        { user: message.data.user, text: message.data.text },
-      ]);
+      const user = message.data.user;
+      const text = message.data.text;
+      setChat((chat) => [...chat, { user: user, text: text }]);
     } else if (message.detail === "MOVE") {
       const pieceData = message.data[0];
       const playerNumberData = message.data[1];
@@ -102,10 +101,33 @@ export default function Game() {
       const roundResultColorWin = roundResult[1];
       if (roundResultEvaluate) {
         playersData = addWinToPlayer(roundResultColorWin, playersData);
-        SwalRoundWinner(roundResultColorWin, playersData);
+        SwalRoundWinner(roundResultColorWin, playersData, SwalRematch);
         resetBoard();
       }
       changeTurn(turnData);
+    } else {
+      // REMATCH
+      const rematchAcceptedIncomingValue = message.data;
+      if (!rematchAcceptedIncomingValue) {
+        // REMATCH NOT ACCEPTED
+        window.location = window.location.origin;
+      } else if (rematchConfirm) {
+        // REMATCH START
+        setPlayers({
+          player1Name: players.player1Name,
+          player1Id: players.player1Id,
+          player1Wins: 0,
+          player2Name: players.player2Name,
+          player2Id: players.player2Id,
+          player2Wins: 0,
+        });
+        resetBoard();
+        SwalStart();
+        rematchConfirm = false;
+      } else {
+        // REMATCH CONFIRM
+        rematchConfirm = true;
+      }
     }
   };
 
@@ -399,6 +421,30 @@ export default function Game() {
     return newPlayersData;
   };
 
+  const SwalRematch = () => {
+    return Swal.fire({
+      title: `Revancha?`,
+      heightAuto: false,
+      allowOutsideClick: false,
+      showCancelButton: true,
+      showConfirmButton: true,
+      confirmButtonText: "Si",
+      cancelButtonText: "No",
+      confirmButtonColor: "green",
+      cancelButtonColor: "red",
+      backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+    }).then((result) => {
+      ws_game.send(CreateMessageGame(gameId, result.isConfirmed, "REMATCH"));
+      if (result.isConfirmed) {
+        SwalRematchWaiting();
+      }
+    });
+  };
+
   const ConnectFourGame = (players) => {
     return (
       <div className="board">
@@ -538,7 +584,7 @@ const SwalDisconnectOpponent = () => {
   });
 };
 
-const SwalRoundWinner = (winnerColor, pData) => {
+const SwalRoundWinner = (winnerColor, pData, swalRematch) => {
   let winnerRoundName;
   if (winnerColor === "rojo") {
     winnerRoundName = pData.player1Name;
@@ -560,13 +606,13 @@ const SwalRoundWinner = (winnerColor, pData) => {
   }).then((result) => {
     if (result.dismiss === Swal.DismissReason.timer) {
       if (pData.player1Wins === 3 || pData.player2Wins === 3) {
-        SwalPlayerWinner(winnerRoundName);
+        SwalPlayerWinner(winnerRoundName, swalRematch);
       }
     }
   });
 };
 
-const SwalPlayerWinner = (pName) => {
+const SwalPlayerWinner = (pName, swalRematch) => {
   return Swal.fire({
     title: `${pName} gana la partida!`,
     heightAuto: false,
@@ -581,7 +627,22 @@ const SwalPlayerWinner = (pName) => {
   `,
   }).then((result) => {
     if (result.dismiss === Swal.DismissReason.timer) {
-      window.location = window.location.origin;
+      swalRematch();
     }
+  });
+};
+
+const SwalRematchWaiting = () => {
+  return Swal.fire({
+    title: `Esperando confirmacion de oponente...`,
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
   });
 };
