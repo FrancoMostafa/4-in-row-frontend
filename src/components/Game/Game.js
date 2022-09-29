@@ -100,9 +100,14 @@ export default function Game() {
       const roundResultEvaluate = roundResult[0];
       const roundResultColorWin = roundResult[1];
       if (roundResultEvaluate) {
-        playersData = addWinToPlayer(roundResultColorWin, playersData);
-        SwalRoundWinner(roundResultColorWin, playersData, SwalRematch);
-        resetBoard();
+        if (roundResultColorWin !== "DRAW") {
+          playersData = addWinToPlayer(roundResultColorWin, playersData);
+          SwalRoundWinner(roundResultColorWin, playersData, SwalRematch);
+          resetBoard();
+        } else {
+          SwalDraw();
+          resetBoard();
+        }
       }
       changeTurn(turnData);
     } else {
@@ -355,6 +360,21 @@ export default function Game() {
           }
         }
       }
+
+      // game over draw
+      let count = 0;
+      for (let c = 0; c <= 6; c++) {
+        for (let r = 0; r <= 5; r++) {
+          if (isRed(board[c][r]) || isYellow(board[c][r])) {
+            count += 1;
+          } else {
+            break;
+          }
+        }
+      }
+      if (count === 42) {
+        return [true, "DRAW"];
+      }
     }
 
     return [false, null];
@@ -445,7 +465,7 @@ export default function Game() {
     });
   };
 
-  const ConnectFourGame = (players) => {
+  const ConnectFourGame = () => {
     return (
       <div className="board">
         {Object.entries(board).map(([k, col], x) => {
@@ -629,6 +649,22 @@ const SwalPlayerWinner = (pName, swalRematch) => {
     if (result.dismiss === Swal.DismissReason.timer) {
       swalRematch();
     }
+  });
+};
+
+const SwalDraw = () => {
+  return Swal.fire({
+    title: `Empate!`,
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 5000,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
   });
 };
 
