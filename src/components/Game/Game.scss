@@ -31,8 +31,7 @@
     padding: 8px;
     border-style: groove;
     border-width: 6px;
-    border-radius: 1%;
-    
+    border-radius: 1%;    
 }
 
 .amarillo {
@@ -58,12 +57,26 @@
     margin-bottom: 0.9%;
 }
 
-.chat {
-    
-    background: rgb(178, 178, 246);
-    
-    border-style:double;
-    border-width: 5px;
-    border-radius: 2%;
-    
+.chat {   
+    background: rgb(178, 178, 246);        
+}
+
+.rojoJugador {
+    background-image: linear-gradient(#ff7777, #ff0202);
+    width: calc(300px / 6 - 7px);
+    height: calc(300px / 6 - 7px);
+    display: inline-block;
+    box-sizing:border-box;
+    border-radius: 50%;  
+    margin-top: 2%;    
+}
+
+.amarilloJugador {
+    background-image: linear-gradient(#ffff6d, #fff202);
+    width: calc(300px / 6 - 7px);
+    height: calc(300px / 6 - 7px);
+    display: inline-block;
+    box-sizing: border-box;
+    border-radius: 50%;  
+    margin-top: 2%;  
 }
