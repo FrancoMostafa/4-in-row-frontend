@@ -2,7 +2,14 @@ import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import React, { useState, useEffect } from "react";
 import "./Game.scss";
-import { Stack, Grid, Card, CardContent, TextField } from "@mui/material";
+import {
+  Stack,
+  Grid,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+} from "@mui/material";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 
@@ -192,13 +199,9 @@ export default function Game() {
                   mb={0.01}
                   onClick={() => sendMessageChat()}
                 >
-                  <button
-                    variant="outlined"
-                    size="large"
-                    style={{ background: "rgb(178, 178, 246)" }}
-                  >
+                  <Button variant="contained" size="small">
                     enviar
-                  </button>
+                  </Button>
                 </Stack>
               </CardContent>
             </Card>
@@ -207,8 +210,6 @@ export default function Game() {
       </Stack>
     );
   };
-
-  // Connect Four Game
 
   const GameColumn = ({ col, idx, onClick }) => {
     return (
@@ -444,7 +445,7 @@ export default function Game() {
     });
   };
 
-  const ConnectFourGame = () => {
+  const ConnectFourGame = (players) => {
     return (
       <div className="board">
         {Object.entries(board).map(([k, col], x) => {
@@ -463,7 +464,7 @@ export default function Game() {
   return (
     <main className="game">
       <Paper>
-        <h1>4 EN RAYA</h1>
+        <h1>4 EN LÍNEA</h1>
       </Paper>
 
       <Box
@@ -479,10 +480,16 @@ export default function Game() {
       >
         <div>
           <Paper>
-            <h3>player1Name</h3>
+            <h3>
+              <div className="rojoJugador"></div>
+              {players.player1Name}
+            </h3>
           </Paper>
           <Paper>
-            <h3>player2Name</h3>
+            <h3>
+              <div className="amarilloJugador"></div>
+              {players.player2Name}
+            </h3>
           </Paper>
         </div>
         <Paper>{ConnectFourGame()}</Paper>
