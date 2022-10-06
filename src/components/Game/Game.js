@@ -54,7 +54,7 @@ export default function Game() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
 
-  const HandleMessageGame = (message) => {
+  const HandleMessageGame = async (message) => {
     if (message.detail === "WAITING") {
       SwalWaiting();
     } else if (message.detail === "READY") {
@@ -102,6 +102,8 @@ export default function Game() {
       const roundResultWinRow = roundResult[2];
       if (roundResultEvaluate) {
         if (roundResultColorWin !== "DRAW") {
+          PrintWinRow(roundResultWinRow);
+          await new Promise((resolve) => setTimeout(resolve, 2500));
           playersData = addWinToPlayer(roundResultColorWin, playersData);
           SwalRoundWinner(
             roundResultColorWin,
@@ -117,18 +119,16 @@ export default function Game() {
       changeTurn(turnData);
     } else {
       // REMATCH
-      const rematchAcceptedIncomingValue = message.data;
+      const rematchAcceptedIncomingValue = message.data[0];
+      const rematchPlayersIncomingValue = message.data[1];
       if (!rematchAcceptedIncomingValue) {
         // REMATCH NOT ACCEPTED
         window.location = window.location.origin;
       } else if (rematchConfirm) {
         // REMATCH START
         setPlayers({
-          player1Name: players.player1Name,
-          player1Id: players.player1Id,
+          ...rematchPlayersIncomingValue,
           player1Wins: 0,
-          player2Name: players.player2Name,
-          player2Id: players.player2Id,
           player2Wins: 0,
         });
         resetBoard();
@@ -563,7 +563,7 @@ export default function Game() {
     }
   };
 
-  const SwalRematch = () => {
+  const SwalRematch = (pData) => {
     return Swal.fire({
       title: `Revancha?`,
       heightAuto: false,
@@ -580,7 +580,9 @@ export default function Game() {
     no-repeat
   `,
     }).then((result) => {
-      ws_game.send(CreateMessageGame(gameId, result.isConfirmed, "REMATCH"));
+      ws_game.send(
+        CreateMessageGame(gameId, [result.isConfirmed, pData], "REMATCH")
+      );
       if (result.isConfirmed) {
         SwalRematchWaiting();
       }
@@ -675,7 +677,7 @@ const SwalStart = () => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
@@ -692,7 +694,7 @@ const SwalDisconnect = () => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
@@ -713,7 +715,7 @@ const SwalDisconnectOpponent = () => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
@@ -726,14 +728,13 @@ const SwalDisconnectOpponent = () => {
   });
 };
 
-const SwalRoundWinner = async (winnerColor, pData, swalRematch, resetBoard) => {
+const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
   let winnerRoundName;
   if (winnerColor === "rojo") {
     winnerRoundName = pData.player1Name;
   } else {
     winnerRoundName = pData.player2Name;
   }
-  await new Promise((resolve) => setTimeout(resolve, 2500));
   return Swal.fire({
     title: `${winnerRoundName} gana la ronda!`,
     heightAuto: false,
@@ -745,20 +746,20 @@ const SwalRoundWinner = async (winnerColor, pData, swalRematch, resetBoard) => {
     if (result.dismiss === Swal.DismissReason.timer) {
       resetBoard();
       if (pData.player1Wins === 3 || pData.player2Wins === 3) {
-        SwalPlayerWinner(winnerRoundName, swalRematch);
+        SwalPlayerWinner(winnerRoundName, swalRematch, pData);
       }
     }
   });
 };
 
-const SwalPlayerWinner = (pName, swalRematch) => {
+const SwalPlayerWinner = (pName, swalRematch, pData) => {
   return Swal.fire({
     title: `${pName} gana la partida!`,
     heightAuto: false,
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
@@ -766,7 +767,7 @@ const SwalPlayerWinner = (pName, swalRematch) => {
   `,
   }).then((result) => {
     if (result.dismiss === Swal.DismissReason.timer) {
-      swalRematch();
+      swalRematch(pData);
     }
   });
 };
@@ -778,7 +779,7 @@ const SwalDraw = (resetBoard) => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
