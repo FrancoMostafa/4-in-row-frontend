@@ -111,7 +111,7 @@ export default function Game() {
           );
           PrintWinRow(roundResultWinRow);
         } else {
-          SwalDraw();
+          SwalDraw(resetBoard);
         }
       }
       changeTurn(turnData);
@@ -771,7 +771,7 @@ const SwalPlayerWinner = (pName, swalRematch) => {
   });
 };
 
-const SwalDraw = () => {
+const SwalDraw = (resetBoard) => {
   return Swal.fire({
     title: `Empate!`,
     heightAuto: false,
@@ -784,6 +784,10 @@ const SwalDraw = () => {
     left top
     no-repeat
   `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      resetBoard();
+    }
   });
 };
 
