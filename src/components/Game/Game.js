@@ -103,12 +103,15 @@ export default function Game() {
       if (roundResultEvaluate) {
         if (roundResultColorWin !== "DRAW") {
           playersData = addWinToPlayer(roundResultColorWin, playersData);
-          SwalRoundWinner(roundResultColorWin, playersData, SwalRematch);
+          SwalRoundWinner(
+            roundResultColorWin,
+            playersData,
+            SwalRematch,
+            resetBoard
+          );
           PrintWinRow(roundResultWinRow);
-          //resetBoard();
         } else {
           SwalDraw();
-          //resetBoard();
         }
       }
       changeTurn(turnData);
@@ -552,9 +555,8 @@ export default function Game() {
   };
 
   const PrintWinRow = (winRow) => {
-    const piece = <div className="negro"></div>;
+    const piece = <div className="verde"></div>;
     for (let i = 0; i < winRow.length; i++) {
-      console.log(winRow[i]);
       const column = board[winRow[i][0]];
       column[winRow[i][1]] = piece;
       setBoard({ ...board, [winRow[i][0]]: column });
@@ -724,27 +726,24 @@ const SwalDisconnectOpponent = () => {
   });
 };
 
-const SwalRoundWinner = (winnerColor, pData, swalRematch) => {
+const SwalRoundWinner = async (winnerColor, pData, swalRematch, resetBoard) => {
   let winnerRoundName;
   if (winnerColor === "rojo") {
     winnerRoundName = pData.player1Name;
   } else {
     winnerRoundName = pData.player2Name;
   }
+  await new Promise((resolve) => setTimeout(resolve, 2500));
   return Swal.fire({
     title: `${winnerRoundName} gana la ronda!`,
     heightAuto: false,
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
-    backdrop: `
-    rgba(0, 0, 0, 0.8)
-    left top
-    no-repeat
-  `,
+    timer: 2500,
   }).then((result) => {
     if (result.dismiss === Swal.DismissReason.timer) {
+      resetBoard();
       if (pData.player1Wins === 3 || pData.player2Wins === 3) {
         SwalPlayerWinner(winnerRoundName, swalRematch);
       }
