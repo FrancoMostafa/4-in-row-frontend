@@ -1,74 +1,83 @@
 .column {
-    display: flex;
-    flex-direction: column-reverse;
-    flex-grow: 1;
-    border: 3px solid navy;
-    padding: 10px;
-  }
+  display: flex;
+  flex-direction: column-reverse;
+  flex-grow: 1;
+  border: 3px solid navy;
+  padding: 10px;
+}
 
 .cell {
-   /*  flex-grow: 1;
+  /*  flex-grow: 1;
     padding: 10px;
     height: 20px; */
 
-    width: calc(700px / 7 - 8px);
-    height: calc(700px / 7 - 8px);
-    background: white;
-    display: inline-block;
-    box-sizing: border-box;
-    border-radius: 50%;
-    margin: 4px;
-    cursor: pointer;
+  width: calc(700px / 7 - 8px);
+  height: calc(700px / 7 - 8px);
+  background: white;
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: 50%;
+  margin: 4px;
+  cursor: pointer;
 }
 
 .board {
-    display: flex;
-    flex: 1;
+  display: flex;
+  flex: 1;
 
-    background-image: linear-gradient(#3ca3ff, #003f76);
-    width: 890px;
-    margin: auto;
-    padding: 8px;
-    border-style: groove;
-    border-width: 6px;
-    border-radius: 1%;    
+  background-image: linear-gradient(#3ca3ff, #003f76);
+  width: 890px;
+  margin: auto;
+  padding: 8px;
+  border-style: groove;
+  border-width: 6px;
+  border-radius: 1%;
 }
 
 .amarillo {
-    background-image: linear-gradient(#ffff6d, #fff202);
-    width: calc(700px / 7 - 8px);
-    height: calc(700px / 7 - 8px);
-    display: inline-block;
-    box-sizing: border-box;
-    border-radius: 50%;    
+  background-image: linear-gradient(#ffff6d, #fff202);
+  width: calc(700px / 7 - 8px);
+  height: calc(700px / 7 - 8px);
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: 50%;
 }
-  
+
 .rojo {
-    background-image: linear-gradient(#ff7777, #ff0202);
-    width: calc(700px / 7 - 8px);
-    height: calc(700px / 7 - 8px);
-    display: inline-block;
-    box-sizing: border-box;
-    border-radius: 50%;    
+  background-image: linear-gradient(#ff7777, #ff0202);
+  width: calc(700px / 7 - 8px);
+  height: calc(700px / 7 - 8px);
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: 50%;
+}
+
+.verde {
+  background-image: linear-gradient(#2bff00, #2bff00);
+  width: calc(700px / 7 - 8px);
+  height: calc(700px / 7 - 8px);
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: 50%;
 }
 
 .game {
-    text-align: center;
-    margin-bottom: 0.9%;
+  text-align: center;
+  margin-bottom: 0.9%;
 }
 
-.chat {   
-    background: rgb(178, 178, 246);        
+.chat {
+  background: rgb(178, 178, 246);
 }
 
 .rojoJugador {
-    background-image: linear-gradient(#ff7777, #ff0202);
-    width: calc(300px / 6 - 7px);
-    height: calc(300px / 6 - 7px);
-    display: inline-block;
-    box-sizing:border-box;
-    border-radius: 50%;  
-    margin-top: 2%;    
+  background-image: linear-gradient(#ff7777, #ff0202);
+  width: calc(300px / 6 - 7px);
+  height: calc(300px / 6 - 7px);
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: 50%;
+  margin-top: 2%;
 }
 
 .amarilloJugador {

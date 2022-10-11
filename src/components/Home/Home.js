@@ -7,7 +7,6 @@ import {
   TextField,
 } from "@mui/material";
 import Swal from "sweetalert2";
-import "./Home.scss";
 import React, { useState } from "react";
 
 const URL_PUBLIC = "ws://localhost:8080/ws_search_public";

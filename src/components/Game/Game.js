@@ -68,7 +68,7 @@ export default function Game() {
     return () => clearInterval(timer);
   });
 
-  const HandleMessageGame = (message) => {
+  const HandleMessageGame = async (message) => {
     if (message.detail === "WAITING") {
       SwalWaiting();
     } else if (message.detail === "READY") {
@@ -113,26 +113,36 @@ export default function Game() {
       const roundResult = roundOver();
       const roundResultEvaluate = roundResult[0];
       const roundResultColorWin = roundResult[1];
+      const roundResultWinRow = roundResult[2];
       if (roundResultEvaluate) {
-        playersData = addWinToPlayer(roundResultColorWin, playersData);
-        SwalRoundWinner(roundResultColorWin, playersData, SwalRematch);
-        resetBoard();
+        if (roundResultColorWin !== "DRAW") {
+          PrintWinRow(roundResultWinRow);
+          await new Promise((resolve) => setTimeout(resolve, 2500));
+          playersData = addWinToPlayer(roundResultColorWin, playersData);
+          SwalRoundWinner(
+            roundResultColorWin,
+            playersData,
+            SwalRematch,
+            resetBoard
+          );
+          PrintWinRow(roundResultWinRow);
+        } else {
+          SwalDraw(resetBoard);
+        }
       }
       changeTurn(turnData);
     } else {
       // REMATCH
-      const rematchAcceptedIncomingValue = message.data;
+      const rematchAcceptedIncomingValue = message.data[0];
+      const rematchPlayersIncomingValue = message.data[1];
       if (!rematchAcceptedIncomingValue) {
         // REMATCH NOT ACCEPTED
         window.location = window.location.origin;
       } else if (rematchConfirm) {
         // REMATCH START
         setPlayers({
-          player1Name: players.player1Name,
-          player1Id: players.player1Id,
+          ...rematchPlayersIncomingValue,
           player1Wins: 0,
-          player2Name: players.player2Name,
-          player2Id: players.player2Id,
           player2Wins: 0,
         });
         resetBoard();
@@ -261,7 +271,16 @@ export default function Game() {
           isRed(board[c][r + 2]) &&
           isRed(board[c][r + 3])
         ) {
-          return [true, "rojo"];
+          return [
+            true,
+            "rojo",
+            [
+              [c, r],
+              [c, r + 1],
+              [c, r + 2],
+              [c, r + 3],
+            ],
+          ];
         }
         if (
           isYellow(board[c][r]) &&
@@ -269,7 +288,16 @@ export default function Game() {
           isYellow(board[c][r + 2]) &&
           isYellow(board[c][r + 3])
         ) {
-          return [true, "amarillo"];
+          return [
+            true,
+            "amarillo",
+            [
+              [c, r],
+              [c, r + 1],
+              [c, r + 2],
+              [c, r + 3],
+            ],
+          ];
         }
       }
     }
@@ -283,7 +311,16 @@ export default function Game() {
           isRed(board[c + 2][r]) &&
           isRed(board[c + 3][r])
         ) {
-          return [true, "rojo"];
+          return [
+            true,
+            "rojo",
+            [
+              [c, r],
+              [c + 1, r],
+              [c + 2, r],
+              [c + 3, r],
+            ],
+          ];
         }
         if (
           isYellow(board[c][r]) &&
@@ -291,7 +328,16 @@ export default function Game() {
           isYellow(board[c + 2][r]) &&
           isYellow(board[c + 3][r])
         ) {
-          return [true, "amarillo"];
+          return [
+            true,
+            "amarillo",
+            [
+              [c, r],
+              [c + 1, r],
+              [c + 2, r],
+              [c + 3, r],
+            ],
+          ];
         }
       }
     }
@@ -306,7 +352,16 @@ export default function Game() {
             isRed(board[c - 2][r - 2]) &&
             isRed(board[c - 3][r - 3])
           ) {
-            return [true, "rojo"];
+            return [
+              true,
+              "rojo",
+              [
+                [c, r],
+                [c - 1, r - 1],
+                [c - 2, r - 2],
+                [c - 3, r - 3],
+              ],
+            ];
           }
           if (
             isYellow(board[c][r]) &&
@@ -314,7 +369,16 @@ export default function Game() {
             isYellow(board[c - 2][r - 2]) &&
             isYellow(board[c - 3][r - 3])
           ) {
-            return [true, "amarillo"];
+            return [
+              true,
+              "amarillo",
+              [
+                [c, r],
+                [c - 1, r - 1],
+                [c - 2, r - 2],
+                [c - 3, r - 3],
+              ],
+            ];
           }
         }
 
@@ -325,7 +389,16 @@ export default function Game() {
             isRed(board[c - 2][r + 2]) &&
             isRed(board[c - 3][r + 3])
           ) {
-            return [true, "rojo"];
+            return [
+              true,
+              "rojo",
+              [
+                [c, r],
+                [c - 1, r + 1],
+                [c - 2, r + 2],
+                [c - 3, r + 3],
+              ],
+            ];
           }
           if (
             isYellow(board[c][r]) &&
@@ -333,7 +406,16 @@ export default function Game() {
             isYellow(board[c - 2][r + 2]) &&
             isYellow(board[c - 3][r + 3])
           ) {
-            return [true, "amarillo"];
+            return [
+              true,
+              "amarillo",
+              [
+                [c, r],
+                [c - 1, r + 1],
+                [c - 2, r + 2],
+                [c - 3, r + 3],
+              ],
+            ];
           }
         }
 
@@ -344,7 +426,16 @@ export default function Game() {
             isRed(board[c + 2][r + 2]) &&
             isRed(board[c + 3][r + 3])
           ) {
-            return [true, "rojo"];
+            return [
+              true,
+              "rojo",
+              [
+                [c, r],
+                [c + 1, r + 1],
+                [c + 2, r + 2],
+                [c + 3, r + 3],
+              ],
+            ];
           }
           if (
             isYellow(board[c][r]) &&
@@ -352,7 +443,16 @@ export default function Game() {
             isYellow(board[c + 2][r + 2]) &&
             isYellow(board[c + 3][r + 3])
           ) {
-            return [true, "amarillo"];
+            return [
+              true,
+              "amarillo",
+              [
+                [c, r],
+                [c + 1, r + 1],
+                [c + 2, r + 2],
+                [c + 3, r + 3],
+              ],
+            ];
           }
         }
 
@@ -363,7 +463,16 @@ export default function Game() {
             isRed(board[c + 2][r - 2]) &&
             isRed(board[c + 3][r - 3])
           ) {
-            return [true, "rojo"];
+            return [
+              true,
+              "rojo",
+              [
+                [c, r],
+                [c + 1, r - 1],
+                [c + 2, r - 2],
+                [c + 3, r - 3],
+              ],
+            ];
           }
           if (
             isYellow(board[c][r]) &&
@@ -371,13 +480,37 @@ export default function Game() {
             isYellow(board[c + 2][r - 2]) &&
             isYellow(board[c + 3][r - 3])
           ) {
-            return [true, "amarillo"];
+            return [
+              true,
+              "amarillo",
+              [
+                [c, r],
+                [c + 1, r - 1],
+                [c + 2, r - 2],
+                [c + 3, r - 3],
+              ],
+            ];
           }
         }
       }
+
+      // game over draw
+      let count = 0;
+      for (let c = 0; c <= 6; c++) {
+        for (let r = 0; r <= 5; r++) {
+          if (isRed(board[c][r]) || isYellow(board[c][r])) {
+            count += 1;
+          } else {
+            break;
+          }
+        }
+      }
+      if (count === 42) {
+        return [true, "DRAW", null];
+      }
     }
 
-    return [false, null];
+    return [false, null, null];
   };
 
   const sendMove = (columnIdx, pNro, t, p) => {
@@ -441,7 +574,16 @@ export default function Game() {
     return newPlayersData;
   };
 
-  const SwalRematch = () => {
+  const PrintWinRow = (winRow) => {
+    const piece = <div className="verde"></div>;
+    for (let i = 0; i < winRow.length; i++) {
+      const column = board[winRow[i][0]];
+      column[winRow[i][1]] = piece;
+      setBoard({ ...board, [winRow[i][0]]: column });
+    }
+  };
+
+  const SwalRematch = (pData) => {
     return Swal.fire({
       title: `Revancha?`,
       heightAuto: false,
@@ -458,14 +600,16 @@ export default function Game() {
     no-repeat
   `,
     }).then((result) => {
-      ws_game.send(CreateMessageGame(gameId, result.isConfirmed, "REMATCH"));
+      ws_game.send(
+        CreateMessageGame(gameId, [result.isConfirmed, pData], "REMATCH")
+      );
       if (result.isConfirmed) {
         SwalRematchWaiting();
       }
     });
   };
 
-  const ConnectFourGame = (players) => {
+  const ConnectFourGame = () => {
     return (
       <div className="board">
         {Object.entries(board).map(([k, col], x) => {
@@ -606,7 +750,7 @@ const SwalDisconnect = () => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
@@ -627,7 +771,7 @@ const SwalDisconnectOpponent = () => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
@@ -640,7 +784,7 @@ const SwalDisconnectOpponent = () => {
   });
 };
 
-const SwalRoundWinner = (winnerColor, pData, swalRematch) => {
+const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
   let winnerRoundName;
   if (winnerColor === "rojo") {
     winnerRoundName = pData.player1Name;
@@ -653,29 +797,25 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch) => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
-    backdrop: `
-    rgba(0, 0, 0, 0.8)
-    left top
-    no-repeat
-  `,
+    timer: 2500,
   }).then((result) => {
     if (result.dismiss === Swal.DismissReason.timer) {
+      resetBoard();
       if (pData.player1Wins === 3 || pData.player2Wins === 3) {
-        SwalPlayerWinner(winnerRoundName, swalRematch);
+        SwalPlayerWinner(winnerRoundName, swalRematch, pData);
       }
     }
   });
 };
 
-const SwalPlayerWinner = (pName, swalRematch) => {
+const SwalPlayerWinner = (pName, swalRematch, pData) => {
   return Swal.fire({
     title: `${pName} gana la partida!`,
     heightAuto: false,
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 5000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
@@ -683,7 +823,27 @@ const SwalPlayerWinner = (pName, swalRematch) => {
   `,
   }).then((result) => {
     if (result.dismiss === Swal.DismissReason.timer) {
-      swalRematch();
+      swalRematch(pData);
+    }
+  });
+};
+
+const SwalDraw = (resetBoard) => {
+  return Swal.fire({
+    title: `Empate!`,
+    heightAuto: false,
+    allowOutsideClick: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    timer: 2500,
+    backdrop: `
+    rgba(0, 0, 0, 0.8)
+    left top
+    no-repeat
+  `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      resetBoard();
     }
   });
 };
