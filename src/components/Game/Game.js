@@ -36,6 +36,7 @@ export default function Game() {
   const [turn, setTurn] = useState(null);
   const [players, setPlayers] = useState({});
   const [playerNumber, setPlayerNumber] = useState(null);
+  const [seconds, setSeconds] = useState(45);
 
   useEffect(() => {
     ws_game.onopen = () => {
@@ -53,6 +54,19 @@ export default function Game() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
+
+  let timer;
+
+  useEffect(() => {
+    timer = setInterval(() => {
+      setSeconds(seconds - 1);
+      if (seconds === 0) {
+        setSeconds(0);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  });
 
   const HandleMessageGame = (message) => {
     if (message.detail === "WAITING") {
@@ -134,8 +148,10 @@ export default function Game() {
   const changeTurn = (t) => {
     if (t === 1) {
       setTurn(2);
+      setSeconds(45);
     } else {
       setTurn(1);
+      setSeconds(45);
     }
   };
 
@@ -162,16 +178,20 @@ export default function Game() {
 
   const Chat = () => {
     return (
-      <Stack direction="row" justifyContent="left" ml={156}>
+      <Stack direction="row" justifyContent="left" ml={156} mr={2}>
         <Grid
           style={{ textAlign: "left" }}
           sx={{
             width: "100%",
             maxWidth: 275,
+            minWidth: 10,
+
             bgcolor: "background.paper",
             position: "relative",
             overflow: "auto",
             maxHeight: 300,
+            border: 1,
+            borderRadius: 1,
             "& ul": { padding: 0 },
           }}
         >
@@ -461,37 +481,73 @@ export default function Game() {
     );
   };
 
+  const Timer = () => {
+    return <h1>{seconds}</h1>;
+  };
+
   return (
     <main className="game">
       <Paper>
         <h1>4 EN LÍNEA</h1>
       </Paper>
-
       <Box
         sx={{
           display: "flex",
           flexWrap: "wrap",
+          fontSize: 18,
           "& > :not(style)": {
-            m: 0.4,
-            width: 310,
-            height: 310,
+            mt: 0.8,
+            mx: 0.3,
+            width: 308,
+            height: 250,
           },
         }}
       >
-        <div>
-          <Paper>
-            <h3>
-              <div className="rojoJugador"></div>
-              {players.player1Name}
-            </h3>
-          </Paper>
-          <Paper>
-            <h3>
-              <div className="amarilloJugador"></div>
-              {players.player2Name}
-            </h3>
-          </Paper>
-        </div>
+        <Grid
+          sx={{
+            width: "100%",
+            position: "relative",
+            maxHeight: 300,
+            "& ul": { padding: 0 },
+          }}
+        >
+          <div>
+            <Paper
+              sx={{
+                mt: 10,
+                ml: 10,
+                mr: 10,
+              }}
+            >
+              <h3>
+                <div className="rojoJugador"></div>
+                <div>{players.player1Name}</div>
+              </h3>
+            </Paper>
+            <Paper
+              sx={{
+                mt: 5,
+                ml: 10,
+                mr: 10,
+              }}
+            >
+              <h3>
+                <div className="amarilloJugador"></div>
+                <div>{players.player2Name}</div>
+              </h3>
+            </Paper>
+            <Paper
+              sx={{
+                mt: 18,
+                ml: 10,
+                mr: 10,
+              }}
+            >
+              <h4>Tiempo restante:</h4>
+              <Timer />
+            </Paper>
+          </div>
+        </Grid>
         <Paper>{ConnectFourGame()}</Paper>
       </Box>
       {Chat()}
@@ -533,7 +589,7 @@ const SwalStart = () => {
     allowOutsideClick: false,
     showCancelButton: false,
     showConfirmButton: false,
-    timer: 3000,
+    timer: 2500,
     backdrop: `
     rgba(0, 0, 0, 0.8)
     left top
