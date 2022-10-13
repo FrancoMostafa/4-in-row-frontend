@@ -36,7 +36,7 @@ export default function Game() {
   const [turn, setTurn] = useState(null);
   const [players, setPlayers] = useState({});
   const [playerNumber, setPlayerNumber] = useState(null);
-  const [seconds, setSeconds] = useState(45);
+  const [seconds, setSeconds] = useState(null);
 
   useEffect(() => {
     ws_game.onopen = () => {
@@ -52,21 +52,19 @@ export default function Game() {
         SwalDisconnect();
       };
     };
+
+    if (seconds !== null) {
+      changeTimer();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
+  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose, seconds]);
 
-  let timer;
-
-  useEffect(() => {
-    timer = setInterval(() => {
+  const changeTimer = async () => {
+    if (seconds !== 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSeconds(seconds - 1);
-      if (seconds === 0) {
-        setSeconds(0);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  });
+    }
+  };
 
   const HandleMessageGame = async (message) => {
     if (message.detail === "WAITING") {
@@ -97,7 +95,7 @@ export default function Game() {
 
       initTurn(initialTurn);
 
-      SwalStart();
+      SwalStart(setSeconds);
     } else if (message.detail === "DISCONNECT") {
       SwalDisconnectOpponent();
     } else if (message.detail === "CHAT") {
@@ -146,7 +144,7 @@ export default function Game() {
           player2Wins: 0,
         });
         resetBoard();
-        SwalStart();
+        SwalStart(setSeconds);
         rematchConfirm = false;
       } else {
         // REMATCH CONFIRM
@@ -158,11 +156,10 @@ export default function Game() {
   const changeTurn = (t) => {
     if (t === 1) {
       setTurn(2);
-      setSeconds(45);
     } else {
       setTurn(1);
-      setSeconds(45);
     }
+    setSeconds(45);
   };
 
   const initTurn = (initial) => {
@@ -725,7 +722,7 @@ const SwalWaiting = () => {
   });
 };
 
-const SwalStart = () => {
+const SwalStart = (setSeconds) => {
   return Swal.fire({
     icon: "warning",
     title: "Comienza el juego",
@@ -739,6 +736,10 @@ const SwalStart = () => {
     left top
     no-repeat
   `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      setSeconds(45);
+    }
   });
 };
 
