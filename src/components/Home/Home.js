@@ -22,12 +22,12 @@ export default function Home() {
   };
 
   return (
-    <Stack direction="column" mt={12} justifyContent="center">
+    <Stack direction="column" mt={12} mb={-9} justifyContent="center">
       <Grid container spacing={2} justifyContent="center">
         <Grid item xs={4} style={{ textAlign: "center" }}>
           <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>
             <CardContent>
-              <h1>4 EN RAYA</h1>
+              <h1 >4 EN RAYA</h1>
 
               <Stack direction="row" justifyContent="center" mt={8}>
                 <TextField

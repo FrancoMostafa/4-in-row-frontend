@@ -218,35 +218,42 @@ export default function Game() {
   };
 
   const Chat = () => {
-    return (
-      <Stack direction="row" justifyContent="left" ml={145} mr={1}>
+    return (      
+        <Stack direction="row" justifyContent="left" ml={132} mr={2} mt={-10.5} >
         <Grid
           style={{ textAlign: "left" }}
           sx={{
             width: "100%",
-            maxWidth: 345,
-            minWidth: 50,
+            maxWidth: 380,
+            minWidth: 350,
 
             bgcolor: "background.paper",
             position: "relative",
             overflow: "auto",
-            maxHeight: 300,
+            height: 240,
+            marginBottom:3.5,
             border: 1,
             borderRadius: 2,
             "& ul": { padding: 0 },
           }}
         >
-          <div className="chat">
-            <Card style={{ background: "white" }} sx={8} md={4}>
+          <div >
+            <Card style={{ background: "white" }}  md={4}
+            sx={{
+              minHeight: 237
+            }}>
               <CardContent>
                 {chat.map((message) => (
                   <Stack direction="row" justifyContent="left" mt={0.5}>
                     <b>{message.user}</b>: {message.text}
                   </Stack>
                 ))}
-                <Stack direction="row" justifyContent="left" mt={3}>
+                <Stack direction="row" justifyContent="left" mt={2.7} mb={-29}>
                   <TextField
                     style={{ background: "white" }}
+                    sx={{
+                      width: "95%"
+                    }}
                     label="Mensaje"
                     onChange={handleChangeChatMessage}
                     onKeyPress={handleKeypress}
@@ -254,9 +261,11 @@ export default function Game() {
                   />
                 </Stack>
                 <Stack
+                
                   direction="row"
                   justifyContent="center"
-                  mt={1.5}
+                  mt={30}
+                  mb={-1}
                   onClick={() => sendMessageChat()}
                 >
                   <Button variant="contained" size="small">
@@ -267,7 +276,7 @@ export default function Game() {
             </Card>
           </div>
         </Grid>
-      </Stack>
+      </Stack> 
     );
   };
 
@@ -715,11 +724,11 @@ export default function Game() {
 
   const ShowMatch3 = () => {
     return (
-      <h3 style={{ margin: 5 }}>
+      <h2 style={{ margin: 5 }}>
         <div className="contadorWin"></div>
         <div className="contadorWin"></div>
         <div className="contadorWin"></div>
-      </h3>
+      </h2>
     );
   };
 
@@ -752,7 +761,7 @@ export default function Game() {
           <div>
             <Paper
               sx={{
-                mt: 6,
+                mt: 2,
                 ml: 4,
                 mr: 16,
               }}
@@ -767,7 +776,7 @@ export default function Game() {
             </Paper>
             <Paper
               sx={{
-                mt: 6,
+                mt: 4,
                 ml: 4,
                 mr: 16,
               }}
@@ -782,7 +791,7 @@ export default function Game() {
             </Paper>
             <Paper
               sx={{
-                mt: 16,
+                mt: 12,
                 ml: 4,
                 mr: 16,
               }}
@@ -792,7 +801,7 @@ export default function Game() {
             </Paper>
             <Paper
               sx={{
-                mt: -77.5,
+                mt: -66,
                 ml: 26.5,
                 mr: 15,
               }}
