@@ -188,20 +188,20 @@ export default function Game() {
 
   const Chat = () => {
     return (
-      <Stack direction="row" justifyContent="left" ml={156} mr={2}>
+      <Stack direction="row" justifyContent="left" ml={145} mr={1}>
         <Grid
           style={{ textAlign: "left" }}
           sx={{
             width: "100%",
-            maxWidth: 275,
-            minWidth: 10,
+            maxWidth: 345,
+            minWidth: 50,
 
             bgcolor: "background.paper",
             position: "relative",
             overflow: "auto",
             maxHeight: 300,
             border: 1,
-            borderRadius: 1,
+            borderRadius: 2,
             "& ul": { padding: 0 },
           }}
         >
@@ -213,7 +213,7 @@ export default function Game() {
                     <b>{message.user}</b>: {message.text}
                   </Stack>
                 ))}
-                <Stack direction="row" justifyContent="left" mt={2}>
+                <Stack direction="row" justifyContent="left" mt={3}>
                   <TextField
                     style={{ background: "white" }}
                     label="Mensaje"
@@ -225,8 +225,7 @@ export default function Game() {
                 <Stack
                   direction="row"
                   justifyContent="center"
-                  mt={1}
-                  mb={0.01}
+                  mt={1.5}
                   onClick={() => sendMessageChat()}
                 >
                   <Button variant="contained" size="small">
@@ -629,6 +628,70 @@ export default function Game() {
     return <h1>{seconds}</h1>;
   };
 
+  const Contador1 = () => {
+    if (players.player1Wins === 1) {
+      return <ShowMatch1 />;
+    } else if (players.player1Wins === 2) {
+      return <ShowMatch2 />;
+    } else if (players.player1Wins === 3) {
+      return <ShowMatch3 />;
+    } else {
+      return <ShowMatch0 />;
+    }
+  };
+
+  const Contador2 = () => {
+    if (players.player2Wins === 1) {
+      return <ShowMatch1 />;
+    } else if (players.player2Wins === 2) {
+      return <ShowMatch2 />;
+    } else if (players.player2Wins === 3) {
+      return <ShowMatch3 />;
+    } else {
+      return <ShowMatch0 />;
+    }
+  };
+
+  const ShowMatch0 = () => {
+    return (
+      <h2 style={{ margin: 5 }}>
+        <div className="contador"></div>
+        <div className="contador"></div>
+        <div className="contador"></div>
+      </h2>
+    );
+  };
+
+  const ShowMatch1 = () => {
+    return (
+      <h2 style={{ margin: 5 }}>
+        <div className="contadorWin"></div>
+        <div className="contador"></div>
+        <div className="contador"></div>
+      </h2>
+    );
+  };
+
+  const ShowMatch2 = () => {
+    return (
+      <h2 style={{ margin: 5 }}>
+        <div className="contadorWin"></div>
+        <div className="contadorWin"></div>
+        <div className="contador"></div>
+      </h2>
+    );
+  };
+
+  const ShowMatch3 = () => {
+    return (
+      <h3 style={{ margin: 5 }}>
+        <div className="contadorWin"></div>
+        <div className="contadorWin"></div>
+        <div className="contadorWin"></div>
+      </h3>
+    );
+  };
+
   return (
     <main className="game">
       <Paper>
@@ -650,7 +713,7 @@ export default function Game() {
         <Grid
           sx={{
             width: "100%",
-            position: "relative",
+            position: "inherit",
             maxHeight: 300,
             "& ul": { padding: 0 },
           }}
@@ -658,41 +721,55 @@ export default function Game() {
           <div>
             <Paper
               sx={{
-                mt: 10,
-                ml: 10,
-                mr: 10,
+                mt: 6,
+                ml: 4,
+                mr: 16,
               }}
             >
               <h3>
                 <div className="rojoJugador"></div>
                 <div>{players.player1Name}</div>
+                <div>
+                  <Contador1 />
+                </div>
               </h3>
             </Paper>
             <Paper
               sx={{
-                mt: 5,
-                ml: 10,
-                mr: 10,
+                mt: 6,
+                ml: 4,
+                mr: 16,
               }}
             >
               <h3>
                 <div className="amarilloJugador"></div>
                 <div>{players.player2Name}</div>
+                <div>
+                  <Contador2 />
+                </div>
               </h3>
             </Paper>
             <Paper
               sx={{
-                mt: 18,
-                ml: 10,
-                mr: 10,
+                mt: 16,
+                ml: 4,
+                mr: 16,
               }}
             >
               <h4>Tiempo restante:</h4>
               <Timer />
             </Paper>
+            <Paper
+              sx={{
+                mt: -77.5,
+                ml: 26.5,
+                mr: 15,
+              }}
+            >
+              {ConnectFourGame()}
+            </Paper>
           </div>
         </Grid>
-        <Paper>{ConnectFourGame()}</Paper>
       </Box>
       {Chat()}
     </main>
