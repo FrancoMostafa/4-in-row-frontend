@@ -22,6 +22,8 @@ for (var c = 0; c < 7; c++) {
 
 const playerId = (Math.random() + 1).toString(36).substring(7);
 let rematchConfirm = false;
+let timerCurrentVersion = null;
+let gameEnd = false;
 
 export default function Game() {
   // eslint-disable-next-line no-unused-vars
@@ -36,7 +38,7 @@ export default function Game() {
   const [turn, setTurn] = useState(null);
   const [players, setPlayers] = useState({});
   const [playerNumber, setPlayerNumber] = useState(null);
-  const [seconds, setSeconds] = useState(45);
+  const [timer, setTimer] = useState({ version: null, seconds: null });
 
   useEffect(() => {
     ws_game.onopen = () => {
@@ -52,21 +54,28 @@ export default function Game() {
         SwalDisconnect();
       };
     };
+
+    if (timer.seconds === 0) {
+      // GAME OVER FOR TIME
+      timerCurrentVersion = null;
+      ws_game.send(gameId, [players, turn], "TIME_OVER");
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
+  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose, timer]);
 
-  let timer;
-
-  useEffect(() => {
-    timer = setInterval(() => {
-      setSeconds(seconds - 1);
-      if (seconds === 0) {
-        setSeconds(0);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  });
+  const changeTimer = async (timer) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (
+      timer.version === timerCurrentVersion &&
+      timerCurrentVersion !== null &&
+      !gameEnd &&
+      timer.seconds > 0
+    ) {
+      setTimer({ version: timer.version, seconds: timer.seconds - 1 });
+      changeTimer({ version: timer.version, seconds: timer.seconds - 1 });
+    }
+  };
 
   const HandleMessageGame = async (message) => {
     if (message.detail === "WAITING") {
@@ -97,7 +106,7 @@ export default function Game() {
 
       initTurn(initialTurn);
 
-      SwalStart();
+      SwalStart(changeTimer);
     } else if (message.detail === "DISCONNECT") {
       SwalDisconnectOpponent();
     } else if (message.detail === "CHAT") {
@@ -115,6 +124,7 @@ export default function Game() {
       const roundResultColorWin = roundResult[1];
       const roundResultWinRow = roundResult[2];
       if (roundResultEvaluate) {
+        timerCurrentVersion = null;
         if (roundResultColorWin !== "DRAW") {
           PrintWinRow(roundResultWinRow);
           await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -125,11 +135,28 @@ export default function Game() {
             SwalRematch,
             resetBoard
           );
-          PrintWinRow(roundResultWinRow);
         } else {
           SwalDraw(resetBoard);
         }
+        await new Promise((resolve) => setTimeout(resolve, 2500));
       }
+      changeTurn(turnData);
+    } else if (message.detail === "TIME_OVER") {
+      let playersData = message.data[0];
+      const turnData = message.data[1];
+      let roundResultColorWin = null;
+      if (turnData === 1) {
+        roundResultColorWin = "amarillo";
+      } else {
+        roundResultColorWin = "rojo";
+      }
+      SwalRoundWinner(
+        roundResultColorWin,
+        playersData,
+        SwalRematch,
+        resetBoard
+      );
+      await new Promise((resolve) => setTimeout(resolve, 2500));
       changeTurn(turnData);
     } else {
       // REMATCH
@@ -146,7 +173,7 @@ export default function Game() {
           player2Wins: 0,
         });
         resetBoard();
-        SwalStart();
+        SwalStart(changeTimer);
         rematchConfirm = false;
       } else {
         // REMATCH CONFIRM
@@ -158,11 +185,15 @@ export default function Game() {
   const changeTurn = (t) => {
     if (t === 1) {
       setTurn(2);
-      setSeconds(45);
     } else {
       setTurn(1);
-      setSeconds(45);
     }
+    if (timerCurrentVersion !== null) {
+      timerCurrentVersion += 1;
+    } else {
+      timerCurrentVersion = 0;
+    }
+    changeTimer({ version: timerCurrentVersion, seconds: 46 });
   };
 
   const initTurn = (initial) => {
@@ -625,7 +656,7 @@ export default function Game() {
   };
 
   const Timer = () => {
-    return <h1>{seconds}</h1>;
+    return <h1>{timer.seconds}</h1>;
   };
 
   const Contador1 = () => {
@@ -802,7 +833,7 @@ const SwalWaiting = () => {
   });
 };
 
-const SwalStart = () => {
+const SwalStart = (changeTimer) => {
   return Swal.fire({
     icon: "warning",
     title: "Comienza el juego",
@@ -816,6 +847,12 @@ const SwalStart = () => {
     left top
     no-repeat
   `,
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      timerCurrentVersion = 0;
+      gameEnd = false;
+      changeTimer({ version: 0, seconds: 46 });
+    }
   });
 };
 
@@ -880,6 +917,7 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
       resetBoard();
       if (pData.player1Wins === 3 || pData.player2Wins === 3) {
         SwalPlayerWinner(winnerRoundName, swalRematch, pData);
+        gameEnd = true;
       }
     }
   });
