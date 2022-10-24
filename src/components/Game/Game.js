@@ -22,7 +22,8 @@ for (var c = 0; c < 7; c++) {
 
 const playerId = (Math.random() + 1).toString(36).substring(7);
 let rematchConfirm = false;
-let timerCurrentVersion = null;
+let currentTimerVersion = null;
+let timerStop = false;
 let gameEnd = false;
 
 export default function Game() {
@@ -38,7 +39,7 @@ export default function Game() {
   const [turn, setTurn] = useState(null);
   const [players, setPlayers] = useState({});
   const [playerNumber, setPlayerNumber] = useState(null);
-  const [timer, setTimer] = useState({ version: null, seconds: null });
+  const [timer, setTimer] = useState(45);
 
   useEffect(() => {
     ws_game.onopen = () => {
@@ -55,25 +56,20 @@ export default function Game() {
       };
     };
 
-    if (timer.seconds === 0) {
-      // GAME OVER FOR TIME
-      timerCurrentVersion = null;
-      ws_game.send(gameId, [players, turn], "TIME_OVER");
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose, timer]);
+  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
 
-  const changeTimer = async (timer) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    if (
-      timer.version === timerCurrentVersion &&
-      timerCurrentVersion !== null &&
-      !gameEnd &&
-      timer.seconds > 0
-    ) {
-      setTimer({ version: timer.version, seconds: timer.seconds - 1 });
-      changeTimer({ version: timer.version, seconds: timer.seconds - 1 });
+  const changeTimer = async (version, timer) => {
+    if (!timerStop) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (currentTimerVersion === version) {
+        setTimer(timer - 1);
+        if (timer - 1 === 0) {
+          SwalEndTimer();
+        } else {
+          changeTimer(version, timer - 1);
+        }
+      }
     }
   };
 
@@ -124,7 +120,7 @@ export default function Game() {
       const roundResultColorWin = roundResult[1];
       const roundResultWinRow = roundResult[2];
       if (roundResultEvaluate) {
-        timerCurrentVersion = null;
+        timerStop = true;
         if (roundResultColorWin !== "DRAW") {
           PrintWinRow(roundResultWinRow);
           await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -140,23 +136,6 @@ export default function Game() {
         }
         await new Promise((resolve) => setTimeout(resolve, 2500));
       }
-      changeTurn(turnData);
-    } else if (message.detail === "TIME_OVER") {
-      let playersData = message.data[0];
-      const turnData = message.data[1];
-      let roundResultColorWin = null;
-      if (turnData === 1) {
-        roundResultColorWin = "amarillo";
-      } else {
-        roundResultColorWin = "rojo";
-      }
-      SwalRoundWinner(
-        roundResultColorWin,
-        playersData,
-        SwalRematch,
-        resetBoard
-      );
-      await new Promise((resolve) => setTimeout(resolve, 2500));
       changeTurn(turnData);
     } else {
       // REMATCH
@@ -188,12 +167,11 @@ export default function Game() {
     } else {
       setTurn(1);
     }
-    if (timerCurrentVersion !== null) {
-      timerCurrentVersion += 1;
-    } else {
-      timerCurrentVersion = 0;
+    currentTimerVersion += 1;
+    if (!gameEnd) {
+      timerStop = false;
     }
-    changeTimer({ version: timerCurrentVersion, seconds: 46 });
+    changeTimer(currentTimerVersion, 45);
   };
 
   const initTurn = (initial) => {
@@ -218,8 +196,8 @@ export default function Game() {
   };
 
   const Chat = () => {
-    return (      
-        <Stack direction="row" justifyContent="left" ml={132} mr={2} mt={-10.5} >
+    return (
+      <Stack direction="row" justifyContent="left" ml={132} mr={2} mt={-10.5}>
         <Grid
           style={{ textAlign: "left" }}
           sx={{
@@ -231,17 +209,20 @@ export default function Game() {
             position: "relative",
             overflow: "auto",
             height: 240,
-            marginBottom:3.5,
+            marginBottom: 3.5,
             border: 1,
             borderRadius: 2,
             "& ul": { padding: 0 },
           }}
         >
-          <div >
-            <Card style={{ background: "white" }}  md={4}
-            sx={{
-              minHeight: 237
-            }}>
+          <div>
+            <Card
+              style={{ background: "white" }}
+              md={4}
+              sx={{
+                minHeight: 237,
+              }}
+            >
               <CardContent>
                 {chat.map((message) => (
                   <Stack direction="row" justifyContent="left" mt={0.5}>
@@ -252,7 +233,7 @@ export default function Game() {
                   <TextField
                     style={{ background: "white" }}
                     sx={{
-                      width: "95%"
+                      width: "95%",
                     }}
                     label="Mensaje"
                     onChange={handleChangeChatMessage}
@@ -261,7 +242,6 @@ export default function Game() {
                   />
                 </Stack>
                 <Stack
-                
                   direction="row"
                   justifyContent="center"
                   mt={30}
@@ -276,7 +256,7 @@ export default function Game() {
             </Card>
           </div>
         </Grid>
-      </Stack> 
+      </Stack>
     );
   };
 
@@ -648,6 +628,19 @@ export default function Game() {
     });
   };
 
+  const SwalEndTimer = async () => {
+    timerStop = true;
+    let roundResultColorWin = null;
+    if (turn === 1) {
+      roundResultColorWin = "amarillo";
+    } else {
+      roundResultColorWin = "rojo";
+    }
+    SwalRoundWinner(roundResultColorWin, players, SwalRematch, resetBoard);
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    changeTurn(turn);
+  };
+
   const ConnectFourGame = () => {
     return (
       <div className="board">
@@ -665,7 +658,7 @@ export default function Game() {
   };
 
   const Timer = () => {
-    return <h1>{timer.seconds}</h1>;
+    return <h1>{timer}</h1>;
   };
 
   const Contador1 = () => {
@@ -858,9 +851,9 @@ const SwalStart = (changeTimer) => {
   `,
   }).then((result) => {
     if (result.dismiss === Swal.DismissReason.timer) {
-      timerCurrentVersion = 0;
-      gameEnd = false;
-      changeTimer({ version: 0, seconds: 46 });
+      currentTimerVersion = 0;
+      timerStop = false;
+      changeTimer(0, 45);
     }
   });
 };
@@ -925,8 +918,8 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
     if (result.dismiss === Swal.DismissReason.timer) {
       resetBoard();
       if (pData.player1Wins === 3 || pData.player2Wins === 3) {
-        SwalPlayerWinner(winnerRoundName, swalRematch, pData);
         gameEnd = true;
+        SwalPlayerWinner(winnerRoundName, swalRematch, pData);
       }
     }
   });
