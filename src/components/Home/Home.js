@@ -5,9 +5,14 @@ import {
   Card,
   CardContent,
   TextField,
+  Modal,
+  Box,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import Swal from "sweetalert2";
 import React, { useState } from "react";
+import "./Home.scss";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 
 const URL_PUBLIC = "ws://localhost:8080/ws_search_public";
 const URL_PRIVATE = "ws://localhost:8080/ws_search_private";
@@ -22,12 +27,12 @@ export default function Home() {
   };
 
   return (
-    <Stack direction="column" mt={12} mb={-9} justifyContent="center">
-      <Grid container spacing={2} justifyContent="center">
-        <Grid item xs={4} style={{ textAlign: "center" }}>
+    <Stack direction="column" mt={12} mb={-12} justifyContent="center">
+      <Grid container spacing={1} justifyContent="center">
+        <Grid item xs={5} style={{ textAlign: "center" }}>
           <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>
             <CardContent>
-              <h1 >4 EN RAYA</h1>
+              <h1>4 EN LÍNEA</h1>
 
               <Stack direction="row" justifyContent="center" mt={8}>
                 <TextField
@@ -68,6 +73,7 @@ export default function Home() {
                   Buscar Partida Privada
                 </Button>
               </Stack>
+              {Instrucciones()}
             </CardContent>
           </Card>
         </Grid>
@@ -253,4 +259,80 @@ function verifyInputCode(code) {
 function isNumber(value) {
   const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
   return numbers.includes(value);
+}
+
+const stylebox = {
+  position: "relative",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  height: "81%",
+  width: 750,
+  overflow: "auto",
+  bgcolor: "#D7BDE2",
+  border: "2px solid #000",
+  borderRadius: "1%",
+  boxShadow: 10,
+  p: 4,
+};
+
+function Instrucciones() {
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  return (
+    <div>
+      <Box textAlign="center">
+        <Stack direction="row" justifyContent="center" mb={2}>
+          <Button
+            onClick={handleOpen}
+            variant="contained"
+            style={{ background: "#053742" }}
+          >
+            Cómo se juega
+            <HelpOutlineRoundedIcon />
+          </Button>
+        </Stack>
+      </Box>
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={stylebox}>
+          <Stack direction="row" justifyContent="right" mr={-1} mb={1}>
+            <Button onClick={handleClose}>
+              <CloseIcon color="error" />
+            </Button>
+          </Stack>
+          <Stack textAlign={"center"} textTransform={"uppercase"}>
+            <h2 className="Instrucciones">Objetivo:</h2>
+            <p>
+              Ser el primer jugador en conectar 4 fichas del mismo color en una
+              linea, ya sea en vertical, horizontal o diagonal.
+            </p>
+            <h2 className="Instrucciones">Instrucciones:</h2>
+            <p>
+              Los jugadores deben poner una ficha por turno haciendo click en la
+              columna que desee. Se decide al azár quien comienza.
+            </p>
+            <p>
+              Cada turno tiene un tiempo de 45 segundos, si éste se termina gana
+              la ronda el oponente.
+            </p>
+            <p>
+              Si las fichas se terminan y no hubo un ganador, hay empate y
+              vuelve a comenzar otra ronda.
+            </p>
+
+            <h2 className="Instrucciones">Puntaje:</h2>
+            <p>Se necesita ganar 3 rondas para ganar el partido.</p>
+            <p>Se puede pedir la revancha ;)</p>
+          </Stack>
+        </Box>
+      </Modal>
+    </div>
+  );
 }

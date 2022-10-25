@@ -72,8 +72,8 @@ export default function Game() {
       !gameEnd &&
       timer.seconds > 0
     ) {
-      setTimer({ version: timer.version, seconds: timer.seconds - 1 });
-      changeTimer({ version: timer.version, seconds: timer.seconds - 1 });
+      setTimer({ version: timer.version, seconds: timer.seconds });
+      changeTimer({ version: timer.version, seconds: timer.seconds });
     }
   };
 
@@ -218,30 +218,41 @@ export default function Game() {
   };
 
   const Chat = () => {
-    return (      
-        <Stack direction="row" justifyContent="left" ml={132} mr={2} mt={-10.5} >
+    return (
+      <Stack
+        direction="row"
+        justifyContent="left"
+        ml={132}
+        mr={2}
+        mt={-10.5}
+        mb={-18}
+      >
         <Grid
           style={{ textAlign: "left" }}
           sx={{
             width: "100%",
-            maxWidth: 380,
+            maxWidth: 370,
             minWidth: 350,
 
             bgcolor: "background.paper",
             position: "relative",
             overflow: "auto",
             height: 240,
-            marginBottom:3.5,
+            marginBottom: 3.5,
             border: 1,
             borderRadius: 2,
             "& ul": { padding: 0 },
           }}
         >
-          <div >
-            <Card style={{ background: "white" }}  md={4}
-            sx={{
-              minHeight: 237
-            }}>
+          <div>
+            <Card
+              style={{ background: "#CDCCFF" }}
+              md={4}
+              sx={{
+                minHeight: 237,
+              }}
+            >
+              <h2>Chat</h2>
               <CardContent>
                 {chat.map((message) => (
                   <Stack direction="row" justifyContent="left" mt={0.5}>
@@ -250,9 +261,9 @@ export default function Game() {
                 ))}
                 <Stack direction="row" justifyContent="left" mt={2.7} mb={-29}>
                   <TextField
-                    style={{ background: "white" }}
+                    style={{ background: "#EBEDEF" }}
                     sx={{
-                      width: "95%"
+                      width: "95%",
                     }}
                     label="Mensaje"
                     onChange={handleChangeChatMessage}
@@ -261,7 +272,6 @@ export default function Game() {
                   />
                 </Stack>
                 <Stack
-                
                   direction="row"
                   justifyContent="center"
                   mt={30}
@@ -276,7 +286,7 @@ export default function Game() {
             </Card>
           </div>
         </Grid>
-      </Stack> 
+      </Stack>
     );
   };
 
@@ -665,7 +675,7 @@ export default function Game() {
   };
 
   const Timer = () => {
-    return <h1>{timer.seconds}</h1>;
+    return <h1>0:{timer.seconds}</h1>;
   };
 
   const Contador1 = () => {
@@ -761,7 +771,7 @@ export default function Game() {
           <div>
             <Paper
               sx={{
-                mt: 2,
+                mt: 3,
                 ml: 4,
                 mr: 16,
               }}
@@ -801,7 +811,7 @@ export default function Game() {
             </Paper>
             <Paper
               sx={{
-                mt: -66,
+                mt: -66.5,
                 ml: 26.5,
                 mr: 15,
               }}
