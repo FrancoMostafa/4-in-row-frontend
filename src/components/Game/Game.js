@@ -67,16 +67,14 @@ export default function Game() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
 
-  const changeTimer = async (version, timer) => {
-    if (!timerStop) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      if (currentTimerVersion === version) {
-        setTimer(timer - 1);
-        if (timer - 1 === 0) {
-          SwalEndTimer();
-        } else {
-          changeTimer(version, timer - 1);
-        }
+  const changeTimer = async (version, timer, pData, tData) => {
+    if (currentTimerVersion === version && !timerStop) {
+      setTimer(timer);
+      if (timer === 0) {
+        SwalEndTimer(pData, tData);
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        changeTimer(version, timer - 1, pData, tData);
       }
     }
   };
@@ -110,7 +108,18 @@ export default function Game() {
 
       initTurn(initialTurn);
 
-      SwalStart(changeTimer);
+      SwalStart(
+        changeTimer,
+        {
+          player1Name: player1Name,
+          player1Id: player1Id,
+          player1Wins: 0,
+          player2Name: player2Name,
+          player2Id: player2Id,
+          player2Wins: 0,
+        },
+        initialTurn
+      );
     } else if (message.detail === "DISCONNECT") {
       SwalDisconnectOpponent();
     } else if (message.detail === "CHAT") {
@@ -144,7 +153,7 @@ export default function Game() {
         }
         await new Promise((resolve) => setTimeout(resolve, 2500));
       }
-      changeTurn(turnData);
+      changeTurn(turnData, playersData);
     } else {
       // REMATCH
       const rematchAcceptedIncomingValue = message.data[0];
@@ -160,8 +169,19 @@ export default function Game() {
           player2Wins: 0,
         });
         resetBoard();
-        SwalStart(changeTimer);
+        const newInitialTurn = Math.floor(Math.random() * (2 - 1 + 1) + 1);
+        initTurn(newInitialTurn);
+        gameEnd = false;
         rematchConfirm = false;
+        SwalStart(
+          changeTimer,
+          {
+            ...rematchPlayersIncomingValue,
+            player1Wins: 0,
+            player2Wins: 0,
+          },
+          newInitialTurn
+        );
       } else {
         // REMATCH CONFIRM
         rematchConfirm = true;
@@ -169,17 +189,23 @@ export default function Game() {
     }
   };
 
-  const changeTurn = (t) => {
+  const changeTurn = (t, pData) => {
+    let tData = t;
+    console.log("TURNO: " + t);
+    console.log("PLAYER DATA: " + pData);
     if (t === 1) {
       setTurn(2);
+      tData = 2;
     } else {
       setTurn(1);
+      tData = 1;
     }
     currentTimerVersion += 1;
     if (!gameEnd) {
       timerStop = false;
     }
-    changeTimer(currentTimerVersion, 45);
+    console.log("TIMER_STOP: " + timerStop);
+    changeTimer(currentTimerVersion, 45, pData, tData);
   };
 
   const initTurn = (initial) => {
@@ -647,17 +673,18 @@ export default function Game() {
     });
   };
 
-  const SwalEndTimer = async () => {
+  const SwalEndTimer = async (pData, tData) => {
     timerStop = true;
     let roundResultColorWin = null;
-    if (turn === 1) {
+    if (tData === 1) {
       roundResultColorWin = "amarillo";
     } else {
       roundResultColorWin = "rojo";
     }
-    SwalRoundWinner(roundResultColorWin, players, SwalRematch, resetBoard);
+    const playersData = addWinToPlayer(roundResultColorWin, pData);
+    SwalRoundWinner(roundResultColorWin, playersData, SwalRematch, resetBoard);
     await new Promise((resolve) => setTimeout(resolve, 2500));
-    changeTurn(turn);
+    changeTurn(tData, playersData);
   };
 
   const soundPiece = () => {
@@ -866,8 +893,17 @@ const SwalWaiting = () => {
   });
 };
 
-const SwalStart = (changeTimer) => {
+const SwalStart = (changeTimer, pData, tData) => {
   soundStart();
+  const SwalStartAction = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    currentTimerVersion = 0;
+    timerStop = false;
+    changeTimer(0, 45, pData, tData);
+  };
+
+  SwalStartAction();
+
   return Swal.fire({
     icon: "warning",
     title: "Comienza el juego",
@@ -881,12 +917,6 @@ const SwalStart = (changeTimer) => {
     left top
     no-repeat
   `,
-  }).then((result) => {
-    if (result.dismiss === Swal.DismissReason.timer) {
-      currentTimerVersion = 0;
-      timerStop = false;
-      changeTimer(0, 45);
-    }
   });
 };
 
@@ -895,7 +925,13 @@ const soundStart = () => {
 };
 
 const SwalDisconnect = () => {
-  soundDesconection();
+  const SwalDisconnectAction = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    window.location = window.location.origin;
+  };
+
+  SwalDisconnectAction();
+
   return Swal.fire({
     icon: "error",
     title: "Se ha perdido la conexion",
@@ -909,15 +945,18 @@ const SwalDisconnect = () => {
     left top
     no-repeat
   `,
-  }).then((result) => {
-    if (result.dismiss === Swal.DismissReason.timer) {
-      window.location = window.location.origin;
-    }
   });
 };
 
 const SwalDisconnectOpponent = () => {
   soundDesconection();
+  const SwalDisconnectOpponentAction = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    window.location = window.location.origin;
+  };
+
+  SwalDisconnectOpponentAction();
+
   return Swal.fire({
     icon: "error",
     title: "Tu oponente se ha desconectado",
@@ -931,10 +970,6 @@ const SwalDisconnectOpponent = () => {
     left top
     no-repeat
   `,
-  }).then((result) => {
-    if (result.dismiss === Swal.DismissReason.timer) {
-      window.location = window.location.origin;
-    }
   });
 };
 
@@ -950,6 +985,18 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
     winnerRoundName = pData.player2Name;
   }
   soundWin();
+
+  const SwalRoundWinnerAction = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    resetBoard();
+    if (pData.player1Wins === 3 || pData.player2Wins === 3) {
+      gameEnd = true;
+      SwalPlayerWinner(winnerRoundName, swalRematch, pData);
+    }
+  };
+
+  SwalRoundWinnerAction();
+
   return Swal.fire({
     title: `${winnerRoundName} gana la ronda!`,
     heightAuto: false,
@@ -957,19 +1004,18 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
     showCancelButton: false,
     showConfirmButton: false,
     timer: 2500,
-  }).then((result) => {
-    if (result.dismiss === Swal.DismissReason.timer) {
-      resetBoard();
-      if (pData.player1Wins === 3 || pData.player2Wins === 3) {
-        gameEnd = true;
-        SwalPlayerWinner(winnerRoundName, swalRematch, pData);
-      }
-    }
   });
 };
 
 const SwalPlayerWinner = (pName, swalRematch, pData) => {
   soundWinMatch();
+  const SwalPlayerWinnerAction = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    swalRematch(pData);
+  };
+
+  SwalPlayerWinnerAction();
+
   return Swal.fire({
     title: `${pName} gana la partida!`,
     heightAuto: false,
@@ -982,10 +1028,6 @@ const SwalPlayerWinner = (pName, swalRematch, pData) => {
     left top
     no-repeat
   `,
-  }).then((result) => {
-    if (result.dismiss === Swal.DismissReason.timer) {
-      swalRematch(pData);
-    }
   });
 };
 
@@ -999,6 +1041,13 @@ const soundWinMatch = () => {
 
 const SwalDraw = (resetBoard) => {
   soundDraw();
+  const SwalDrawAction = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    resetBoard();
+  };
+
+  SwalDrawAction();
+
   return Swal.fire({
     title: `Empate!`,
     heightAuto: false,
@@ -1011,10 +1060,6 @@ const SwalDraw = (resetBoard) => {
     left top
     no-repeat
   `,
-  }).then((result) => {
-    if (result.dismiss === Swal.DismissReason.timer) {
-      resetBoard();
-    }
   });
 };
 
