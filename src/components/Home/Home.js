@@ -27,7 +27,7 @@ export default function Home() {
   };
 
   return (
-    <Stack direction="column" mt={12} mb={-12} justifyContent="center">
+    <Stack direction="row" mt={8} mb={-12.5} justifyContent="center">
       <Grid container spacing={1} justifyContent="center">
         <Grid item xs={5} style={{ textAlign: "center" }}>
           <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>
@@ -310,26 +310,38 @@ function Instrucciones() {
           <Stack textAlign={"center"} textTransform={"uppercase"}>
             <h2 className="Instrucciones">Objetivo:</h2>
             <p>
-              Ser el primer jugador en conectar 4 fichas del mismo color en una
-              linea, ya sea en vertical, horizontal o diagonal.
+              <b>
+                Ser el primer jugador en conectar 4 fichas del mismo color en
+                una linea, ya sea en vertical, horizontal o diagonal.
+              </b>
             </p>
             <h2 className="Instrucciones">Instrucciones:</h2>
             <p>
-              Los jugadores deben poner una ficha por turno haciendo click en la
-              columna que desee. Se decide al azár quien comienza.
+              <b>
+                Los jugadores deben poner una ficha por turno haciendo click en
+                la columna que desee. Se decide al azár quien comienza.
+              </b>
             </p>
             <p>
-              Cada turno tiene un tiempo de 45 segundos, si éste se termina gana
-              la ronda el oponente.
+              <b>
+                Cada turno tiene un tiempo de 45 segundos, si éste se termina
+                gana la ronda el oponente.
+              </b>
             </p>
             <p>
-              Si las fichas se terminan y no hubo un ganador, hay empate y
-              vuelve a comenzar otra ronda.
+              <b>
+                Si las fichas se terminan y no hubo un ganador, hay empate y
+                vuelve a comenzar otra ronda.
+              </b>
             </p>
 
             <h2 className="Instrucciones">Puntaje:</h2>
-            <p>Se necesita ganar 3 rondas para ganar el partido.</p>
-            <p>Se puede pedir la revancha ;)</p>
+            <p>
+              <b>Se necesita ganar 3 rondas para ganar la partida.</b>
+            </p>
+            <p>
+              <b>Se puede pedir la revancha ;)</b>
+            </p>
           </Stack>
         </Box>
       </Modal>

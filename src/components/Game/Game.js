@@ -12,6 +12,14 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import audioPiece from "../../assets/sounds/addPieceMove.mp3";
+import audioWin from "../../assets/sounds/win.mp3";
+import audioRematch from "../../assets/sounds/rematch.mp3";
+import audioChat from "../../assets/sounds/chat.mp3";
+import audioWinMatch from "../../assets/sounds/winMatch.mp3";
+import audioStart from "../../assets/sounds/start.mp3";
+import audioDesconection from "../../assets/sounds/desconection.mp3";
+import audioDraw from "../../assets/sounds/draw.mp3";
 
 const URL_GAME = "ws://localhost:8080/ws_game";
 
@@ -179,6 +187,7 @@ export default function Game() {
   };
 
   const sendMessageChat = () => {
+    soundChat();
     ws_game.send(
       CreateMessageGame(gameId, { user: name, text: `${chatMessage}` }, "CHAT")
     );
@@ -564,6 +573,7 @@ export default function Game() {
       ...board,
       [columnIdx]: column,
     });
+    soundPiece();
   };
 
   const resetBoard = () => {
@@ -611,6 +621,7 @@ export default function Game() {
   };
 
   const SwalRematch = (pData) => {
+    soundRematch();
     return Swal.fire({
       title: `Revancha?`,
       heightAuto: false,
@@ -647,6 +658,18 @@ export default function Game() {
     SwalRoundWinner(roundResultColorWin, players, SwalRematch, resetBoard);
     await new Promise((resolve) => setTimeout(resolve, 2500));
     changeTurn(turn);
+  };
+
+  const soundPiece = () => {
+    new Audio(audioPiece).play();
+  };
+
+  const soundRematch = () => {
+    new Audio(audioRematch).play();
+  };
+
+  const soundChat = () => {
+    new Audio(audioChat).play();
   };
 
   const ConnectFourGame = () => {
@@ -844,6 +867,7 @@ const SwalWaiting = () => {
 };
 
 const SwalStart = (changeTimer) => {
+  soundStart();
   return Swal.fire({
     icon: "warning",
     title: "Comienza el juego",
@@ -866,7 +890,12 @@ const SwalStart = (changeTimer) => {
   });
 };
 
+const soundStart = () => {
+  new Audio(audioStart).play();
+};
+
 const SwalDisconnect = () => {
+  soundDesconection();
   return Swal.fire({
     icon: "error",
     title: "Se ha perdido la conexion",
@@ -888,6 +917,7 @@ const SwalDisconnect = () => {
 };
 
 const SwalDisconnectOpponent = () => {
+  soundDesconection();
   return Swal.fire({
     icon: "error",
     title: "Tu oponente se ha desconectado",
@@ -908,6 +938,10 @@ const SwalDisconnectOpponent = () => {
   });
 };
 
+const soundDesconection = () => {
+  new Audio(audioDesconection).play();
+};
+
 const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
   let winnerRoundName;
   if (winnerColor === "rojo") {
@@ -915,6 +949,7 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
   } else {
     winnerRoundName = pData.player2Name;
   }
+  soundWin();
   return Swal.fire({
     title: `${winnerRoundName} gana la ronda!`,
     heightAuto: false,
@@ -934,6 +969,7 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
 };
 
 const SwalPlayerWinner = (pName, swalRematch, pData) => {
+  soundWinMatch();
   return Swal.fire({
     title: `${pName} gana la partida!`,
     heightAuto: false,
@@ -953,7 +989,16 @@ const SwalPlayerWinner = (pName, swalRematch, pData) => {
   });
 };
 
+const soundWin = () => {
+  new Audio(audioWin).play();
+};
+
+const soundWinMatch = () => {
+  new Audio(audioWinMatch).play();
+};
+
 const SwalDraw = (resetBoard) => {
+  soundDraw();
   return Swal.fire({
     title: `Empate!`,
     heightAuto: false,
@@ -971,6 +1016,10 @@ const SwalDraw = (resetBoard) => {
       resetBoard();
     }
   });
+};
+
+const soundDraw = () => {
+  new Audio(audioDraw).play();
 };
 
 const SwalRematchWaiting = () => {
