@@ -10,15 +10,43 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Swal from "sweetalert2";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Home.scss";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 
+const RandomStringId = () => {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  for (var i = 0; i < charactersLength; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
+const URL_HOME = "ws://localhost:8080/ws_home";
 const URL_PUBLIC = "ws://localhost:8080/ws_search_public";
 const URL_PRIVATE = "ws://localhost:8080/ws_search_private";
+const userHomeId = RandomStringId();
 
 export default function Home() {
+  // eslint-disable-next-line no-unused-vars
+  const [ws_home, setWs_home] = useState(new WebSocket(URL_HOME));
   const [nick, setNick] = useState("");
+  const [users, setUsers] = useState("0");
+
+  useEffect(() => {
+    ws_home.onopen = () => {
+      ws_home.send(userHomeId);
+      ws_home.onmessage = (e) => {
+        setUsers(e.data);
+      };
+
+      ws_home.onclose = (e) => {};
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ws_home.onopen]);
 
   const handleChangeNick = (e) => {
     if (!(e.target.value.includes("/") || e.target.value.includes("\\"))) {
@@ -32,6 +60,7 @@ export default function Home() {
         <Grid item xs={5} style={{ textAlign: "center" }}>
           <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>
             <CardContent>
+              <h1>{users}</h1>
               <h1>4 EN LÍNEA</h1>
 
               <Stack direction="row" justifyContent="center" mt={8}>
