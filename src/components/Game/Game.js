@@ -444,7 +444,7 @@ export default function Game() {
           }
         }
 
-        if (c >= 3 && r <= 3) {
+        if (c >= 3 && r <= 2) {
           if (
             isRed(board[c][r]) &&
             isRed(board[c - 1][r + 1]) &&
@@ -481,7 +481,7 @@ export default function Game() {
           }
         }
 
-        if (c <= 3 && r <= 3) {
+        if (c <= 3 && r <= 2) {
           if (
             isRed(board[c][r]) &&
             isRed(board[c + 1][r + 1]) &&
