@@ -191,8 +191,7 @@ export default function Game() {
 
   const changeTurn = (t, pData) => {
     let tData = t;
-    console.log("TURNO: " + t);
-    console.log("PLAYER DATA: " + pData);
+
     if (t === 1) {
       setTurn(2);
       tData = 2;
@@ -204,7 +203,7 @@ export default function Game() {
     if (!gameEnd) {
       timerStop = false;
     }
-    console.log("TIMER_STOP: " + timerStop);
+
     changeTimer(currentTimerVersion, 45, pData, tData);
   };
 
@@ -444,7 +443,7 @@ export default function Game() {
           }
         }
 
-        if (c >= 3 && r <= 3) {
+        if (c >= 3 && r <= 2) {
           if (
             isRed(board[c][r]) &&
             isRed(board[c - 1][r + 1]) &&
@@ -481,7 +480,7 @@ export default function Game() {
           }
         }
 
-        if (c <= 3 && r <= 3) {
+        if (c <= 3 && r <= 2) {
           if (
             isRed(board[c][r]) &&
             isRed(board[c + 1][r + 1]) &&

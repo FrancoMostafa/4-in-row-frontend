@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 import React, { useState, useEffect } from "react";
 import "./Home.scss";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import PersonOutlineTwoToneIcon from "@mui/icons-material/PersonOutlineTwoTone";
 
 const RandomStringId = () => {
   let result = "";
@@ -55,58 +56,73 @@ export default function Home() {
   };
 
   return (
-    <Stack direction="row" mt={8} mb={-12.5} justifyContent="center">
-      <Grid container spacing={1} justifyContent="center">
-        <Grid item xs={5} style={{ textAlign: "center" }}>
-          <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>
-            <CardContent>
-              <h1>{users}</h1>
-              <h1>4 EN LÍNEA</h1>
+    <Stack mt={8} mb={-12.5}>
+      <div className="tarjetas">
+        <Grid container spacing={4} justifyContent="center">
+          <Grid item xs={5} style={{ textAlign: "center" }}>
+            <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>
+              <CardContent>
+                <h1>4 EN LÍNEA</h1>
+                <Stack direction="row" justifyContent="center" mt={8}>
+                  <TextField
+                    style={{ background: "white" }}
+                    label="Nick"
+                    onChange={handleChangeNick}
+                    value={nick}
+                  />
+                </Stack>
 
-              <Stack direction="row" justifyContent="center" mt={8}>
-                <TextField
-                  style={{ background: "white" }}
-                  label="Nick"
-                  onChange={handleChangeNick}
-                  value={nick}
-                />
-              </Stack>
-
-              <Stack direction="row" justifyContent="center" mt={4}>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  style={{ background: "#053742" }}
-                  onClick={() => PreFunctionCall(nick, FindPublicMatch)}
-                >
-                  Partida Pública
-                </Button>
-              </Stack>
-              <Stack direction="row" justifyContent="center" mt={4}>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  style={{ background: "#053742" }}
-                  onClick={() => PreFunctionCall(nick, CreatePrivateMatch)}
-                >
-                  Crear Partida Privada
-                </Button>
-              </Stack>
-              <Stack direction="row" justifyContent="center" mb={8} mt={4}>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  style={{ background: "#053742" }}
-                  onClick={() => PreFunctionCall(nick, FindPrivateMatch)}
-                >
-                  Buscar Partida Privada
-                </Button>
-              </Stack>
-              {Instrucciones()}
-            </CardContent>
-          </Card>
+                <Stack direction="row" justifyContent="center" mt={4}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    style={{ background: "#053742" }}
+                    onClick={() => PreFunctionCall(nick, FindPublicMatch)}
+                  >
+                    Partida Pública
+                  </Button>
+                </Stack>
+                <Stack direction="row" justifyContent="center" mt={4}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    style={{ background: "#053742" }}
+                    onClick={() => PreFunctionCall(nick, CreatePrivateMatch)}
+                  >
+                    Crear Partida Privada
+                  </Button>
+                </Stack>
+                <Stack direction="row" justifyContent="center" mb={8} mt={4}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    style={{ background: "#053742" }}
+                    onClick={() => PreFunctionCall(nick, FindPrivateMatch)}
+                  >
+                    Buscar Partida Privada
+                  </Button>
+                </Stack>
+                {Instrucciones()}
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+      </div>
+      <div>
+        <Stack direction="row" mr={2} ml={70} mt={-65} justifyContent="right">
+          <Grid style={{ textAlign: "center" }}>
+            <Grid justifyContent="center">
+              <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 1 }}>
+                <CardContent>
+                  <h5>Jugadores Disponibles</h5>
+                  <PersonOutlineTwoToneIcon />
+                  {users}
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Stack>
+      </div>
     </Stack>
   );
 }
