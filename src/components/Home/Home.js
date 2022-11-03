@@ -23,7 +23,7 @@ const ws_home = new WebSocket(URL_HOME);
 export default function Home() {
   // eslint-disable-next-line no-unused-vars
   const [nick, setNick] = useState("");
-  const [users, setUsers] = useState("CARGANDO...");
+  const [users, setUsers] = useState("cargando...");
 
   ws_home.onopen = () => {
     ws_home.send("NEW USER IN HOME");
