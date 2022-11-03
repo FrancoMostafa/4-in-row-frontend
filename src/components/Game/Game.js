@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./Game.scss";
 import {
   Stack,
@@ -22,21 +22,19 @@ import audioDesconection from "../../assets/sounds/desconection.mp3";
 import audioDraw from "../../assets/sounds/draw.mp3";
 
 const URL_GAME = "ws://localhost:8080/ws_game";
-
-let initial = {};
-for (var c = 0; c < 7; c++) {
-  initial[c] = [null, null, null, null, null, null];
-}
-
+const ws_game = new WebSocket(URL_GAME);
 const playerId = (Math.random() + 1).toString(36).substring(7);
 let rematchConfirm = false;
 let currentTimerVersion = null;
 let timerStop = false;
 let gameEnd = false;
+let initial = {};
+for (var c = 0; c < 7; c++) {
+  initial[c] = [null, null, null, null, null, null];
+}
 
 export default function Game() {
   // eslint-disable-next-line no-unused-vars
-  const [ws_game, setWs_game] = useState(new WebSocket(URL_GAME));
   // eslint-disable-next-line no-unused-vars
   const [name, setName] = useState(useParams().nick);
   // eslint-disable-next-line no-unused-vars
@@ -49,23 +47,19 @@ export default function Game() {
   const [playerNumber, setPlayerNumber] = useState(null);
   const [timer, setTimer] = useState(45);
 
-  useEffect(() => {
-    ws_game.onopen = () => {
-      ws_game.send(
-        CreateMessageGame(gameId, `${name};${playerId}`, `ADD ME TO GAME`)
-      );
+  ws_game.onopen = () => {
+    ws_game.send(
+      CreateMessageGame(gameId, `${name};${playerId}`, `ADD ME TO GAME`)
+    );
 
-      ws_game.onmessage = (e) => {
-        HandleMessageGame(JSON.parse(e.data));
-      };
-
-      ws_game.onclose = (e) => {
-        SwalDisconnect();
-      };
+    ws_game.onmessage = (e) => {
+      HandleMessageGame(JSON.parse(e.data));
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ws_game.onmessage, ws_game.onopen, ws_game.onclose]);
+    ws_game.onclose = (e) => {
+      SwalDisconnect();
+    };
+  };
 
   const changeTimer = async (version, timer, pData, tData) => {
     if (currentTimerVersion === version && !timerStop) {
@@ -191,7 +185,6 @@ export default function Game() {
 
   const changeTurn = (t, pData) => {
     let tData = t;
-
     if (t === 1) {
       setTurn(2);
       tData = 2;
@@ -203,7 +196,6 @@ export default function Game() {
     if (!gameEnd) {
       timerStop = false;
     }
-
     changeTimer(currentTimerVersion, 45, pData, tData);
   };
 
