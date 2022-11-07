@@ -21,7 +21,9 @@ import audioStart from "../../assets/sounds/start.mp3";
 import audioDesconection from "../../assets/sounds/desconection.mp3";
 import audioDraw from "../../assets/sounds/draw.mp3";
 
-const URL_GAME = "ws://localhost:8080/ws_game";
+const baseUrl = process.env.REACT_APP_4_IN_ROW_BASE_URL;
+
+const URL_GAME = `${baseUrl}/ws_game`;
 const ws_game = new WebSocket(URL_GAME);
 const playerId = (Math.random() + 1).toString(36).substring(7);
 let rematchConfirm = false;
