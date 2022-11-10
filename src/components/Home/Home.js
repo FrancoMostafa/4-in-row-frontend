@@ -96,7 +96,7 @@ export default function Home() {
         </Grid>
       </div>
       <div>
-        <Stack direction="row" mr={2} ml={70} mt={-65} justifyContent="right">
+        <Stack direction="row" mr={3} ml={70} mt={-65} justifyContent="right">
           <Grid style={{ textAlign: "center" }}>
             <Grid justifyContent="center">
               <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 1 }}>
@@ -339,7 +339,7 @@ function Instrucciones() {
               <CloseIcon color="error" />
             </Button>
           </Stack>
-          <Stack textAlign={"center"} textTransform={"uppercase"}>
+          <Stack textAlign={"center"}>
             <h2 className="Instrucciones">Objetivo:</h2>
             <p>
               <b>
@@ -362,8 +362,8 @@ function Instrucciones() {
             </p>
             <p>
               <b>
-                Si las fichas se terminan y no hubo un ganador, hay empate y
-                vuelve a comenzar otra ronda.
+                Si las fichas se terminan y no hubo un ganador, hay empate y se
+                comienza otra ronda.
               </b>
             </p>
 
