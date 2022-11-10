@@ -20,12 +20,16 @@ import audioWinMatch from "../../assets/sounds/winMatch.mp3";
 import audioStart from "../../assets/sounds/start.mp3";
 import audioDesconection from "../../assets/sounds/desconection.mp3";
 import audioDraw from "../../assets/sounds/draw.mp3";
+import services from "../../Services/Services";
 
-const baseUrl = process.env.REACT_APP_4_IN_ROW_BASE_URL;
+const wsUrl = process.env.REACT_APP_4_IN_ROW_WS_URL;
 
-const URL_GAME = `${baseUrl}/ws_game`;
+let gameId = null;
+let gameType = null;
+const URL_GAME = `${wsUrl}/ws_game`;
 const ws_game = new WebSocket(URL_GAME);
 const playerId = (Math.random() + 1).toString(36).substring(7);
+let gameVersion = -1;
 let rematchConfirm = false;
 let currentTimerVersion = null;
 let timerStop = false;
@@ -36,11 +40,9 @@ for (var c = 0; c < 7; c++) {
 }
 
 export default function Game() {
-  // eslint-disable-next-line no-unused-vars
-  // eslint-disable-next-line no-unused-vars
+  gameId = useParams().gameId;
+  gameType = useParams().gameType;
   const [name, setName] = useState(useParams().nick);
-  // eslint-disable-next-line no-unused-vars
-  const [gameId, setGameId] = useState(useParams().gameId);
   const [board, setBoard] = useState(initial);
   const [chat, setChat] = useState([]);
   const [chatMessage, setChatMessage] = useState("");
@@ -895,6 +897,13 @@ const SwalStart = (changeTimer, pData, tData) => {
     changeTimer(0, 45, pData, tData);
   };
 
+  gameVersion += 1;
+  services.SaveNewDataOfStatistics(
+    `${gameId}_${gameVersion}`,
+    gameType,
+    "STARTED"
+  );
+
   SwalStartAction();
 
   return Swal.fire({
@@ -985,6 +994,11 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
     if (pData.player1Wins === 3 || pData.player2Wins === 3) {
       gameEnd = true;
       SwalPlayerWinner(winnerRoundName, swalRematch, pData);
+      services.SaveNewDataOfStatistics(
+        `${gameId}_${gameVersion}`,
+        gameType,
+        "FINISHED"
+      );
     }
   };
 

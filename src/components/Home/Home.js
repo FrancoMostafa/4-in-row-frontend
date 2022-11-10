@@ -15,11 +15,11 @@ import "./Home.scss";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import PersonOutlineTwoToneIcon from "@mui/icons-material/PersonOutlineTwoTone";
 
-const baseUrl = process.env.REACT_APP_4_IN_ROW_BASE_URL;
+const wsUrl = process.env.REACT_APP_4_IN_ROW_WS_URL;
 
-const URL_HOME = `${baseUrl}/ws_home`;
-const URL_PUBLIC = `${baseUrl}/ws_search_public`;
-const URL_PRIVATE = `${baseUrl}/ws_search_private`;
+const URL_HOME = `${wsUrl}/ws_home`;
+const URL_PUBLIC = `${wsUrl}/ws_search_public`;
+const URL_PRIVATE = `${wsUrl}/ws_search_private`;
 const ws_home = new WebSocket(URL_HOME);
 
 export default function Home() {
@@ -145,7 +145,7 @@ function FindPublicMatch(nickSelected) {
     ws_search.send("NEW PLAYER IN SEARCH");
 
     ws_search.onmessage = (e) => {
-      window.location = `/game/${e.data}/${nickSelected}`;
+      window.location = `/game/${e.data}/${nickSelected}/PUBLIC`;
     };
 
     ws_search.onclose = (e) => {};
@@ -180,7 +180,7 @@ function CreatePrivateMatch(nickSelected) {
     ws_search.send(`${numberMatch};CREATE`);
 
     ws_search.onmessage = (e) => {
-      window.location = `/game/${e.data}/${nickSelected}`;
+      window.location = `/game/${e.data}/${nickSelected}/PRIVATE`;
     };
 
     ws_search.onclose = (e) => {};
@@ -232,7 +232,7 @@ function FindPrivateMatch(nickSelected) {
           }
         });
       } else {
-        window.location = `/game/${e.data}/${nickSelected}`;
+        window.location = `/game/${e.data}/${nickSelected}/PRIVATE`;
       }
     };
 
