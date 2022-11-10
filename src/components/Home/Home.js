@@ -15,9 +15,11 @@ import "./Home.scss";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import PersonOutlineTwoToneIcon from "@mui/icons-material/PersonOutlineTwoTone";
 
-const URL_HOME = "ws://localhost:8080/ws_home";
-const URL_PUBLIC = "ws://localhost:8080/ws_search_public";
-const URL_PRIVATE = "ws://localhost:8080/ws_search_private";
+const baseUrl = process.env.REACT_APP_4_IN_ROW_BASE_URL;
+
+const URL_HOME = `${baseUrl}/ws_home`;
+const URL_PUBLIC = `${baseUrl}/ws_search_public`;
+const URL_PRIVATE = `${baseUrl}/ws_search_private`;
 const ws_home = new WebSocket(URL_HOME);
 
 export default function Home() {
