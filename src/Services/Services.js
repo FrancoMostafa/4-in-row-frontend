@@ -25,11 +25,10 @@ async function GetStatisticsOfDate() {
   } catch (err) {
     console.error(err);
   }
-  return [];
 }
 
 async function SaveNewDataOfStatistics(gameId, gameType, gameState) {
-  const userCountry = await GetUserCountry();
+  const userCountry = GetUserCountry();
   try {
     const response = await axios({
       url: `${baseUrl}/statistics/${gameId}/${gameType}/${gameState}/${userCountry}`,
@@ -42,17 +41,16 @@ async function SaveNewDataOfStatistics(gameId, gameType, gameState) {
   return [];
 }
 
-async function GetUserCountry() {
+function GetUserCountry() {
   try {
-    const response = await axios({
-      url: `https://ipinfo.io`,
-      method: "GET",
-    });
-    return response.country;
+    const data = Intl.DateTimeFormat()
+      .resolvedOptions()
+      .timeZone.replace(" ", "_");
+    return data.split("/")[1];
   } catch (err) {
-    console.error(err);
+    console.log(err);
+    return "DESCONOCIDO";
   }
-  return "DESCONOCIDO";
 }
 
 const services = {
