@@ -1,21 +1,35 @@
 import React, { useState, useEffect } from "react";
 import services from "../../Services/Services";
-import { Stack, Grid, Card, CardContent, Button } from "@mui/material";
-import "./Statistics.scss";
+import {
+  Stack,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Select,
+  MenuItem,
+} from "@mui/material";
 
 export default function Statistics() {
-  const [statistics, setStatistics] = useState({});
   const [publicGamesStarted, setPublicGamesStarted] = useState([]);
   const [publicGamesFinished, setPublicGamesFinished] = useState([]);
   const [privateGamesStarted, setPrivateGamesStarted] = useState([]);
   const [privateGamesFinished, setPrivateGamesFinished] = useState([]);
-  const [playersCountries, setPlayersCountries] = useState(new Map());
-  const [currentStatistic, setCurrentStatistic] = useState({
-    publicGamesStarted: [],
-    publicGamesFinished: [],
-    privateGamesStarted: [],
-    privateGamesFinished: [],
-  });
+  const [playersCountries, setPlayersCountries] = useState({});
+  const [dates, setDates] = useState([]);
+  const [currentPublicGamesStarted, setCurrentPublicGamesStarted] = useState(
+    []
+  );
+  const [currentPublicGamesFinished, setCurrentPublicGamesFinished] = useState(
+    []
+  );
+  const [currentPrivateGamesStarted, setCurrentPrivateGamesStarted] = useState(
+    []
+  );
+  const [currentPrivateGamesFinished, setCurrentPrivateGamesFinished] =
+    useState([]);
+  const [currentPlayersCountries, setCurrentPlayersCountries] = useState({});
+  const [dateSelected, setDateSelected] = useState({});
 
   useEffect(() => {
     getData();
@@ -23,16 +37,31 @@ export default function Statistics() {
   }, []);
 
   const getData = async () => {
-    const playersCountries = new Map();
     const statisticsResponse = await services.GetAllStatistics();
-    setStatistics(statisticsResponse);
     if (statisticsResponse.length !== undefined) {
-      setCurrentStatistic(statisticsResponse[statisticsResponse.length - 1]);
+      setCurrentPublicGamesStarted(
+        statisticsResponse[statisticsResponse.length - 1].publicGamesStarted
+      );
+      setCurrentPublicGamesFinished(
+        statisticsResponse[statisticsResponse.length - 1].publicGamesFinished
+      );
+      setCurrentPrivateGamesStarted(
+        statisticsResponse[statisticsResponse.length - 1].privateGamesStarted
+      );
+      setCurrentPrivateGamesFinished(
+        statisticsResponse[statisticsResponse.length - 1].privateGamesFinished
+      );
+      setCurrentPlayersCountries(
+        listCountriesToMap(
+          statisticsResponse[statisticsResponse.length - 1].playersCountries
+        )
+      );
       let publicGamesStarted = [];
       let publicGamesFinished = [];
       let privateGamesStarted = [];
       let privateGamesFinished = [];
-      let playersCountries = new Map();
+      let playersCountries = [];
+      let dates = [];
       for (let i = 0; i < statisticsResponse.length; i++) {
         const result = statisticsResponse[i];
         publicGamesStarted = publicGamesStarted.concat(
@@ -47,172 +76,217 @@ export default function Statistics() {
         privateGamesFinished = privateGamesFinished.concat(
           result.privateGamesFinished
         );
-        const dataCountries = getSumCountries(result.playersCountries);
-        playersCountries = new Map(
-          [...playersCountries].concat([...getSumCountries(dataCountries)])
-        );
-        console.log(playersCountries);
+        playersCountries = playersCountries.concat(result.playersCountries);
+        dates.push(result.date);
       }
       setPublicGamesStarted(publicGamesStarted);
       setPublicGamesFinished(publicGamesFinished);
       setPrivateGamesStarted(privateGamesStarted);
       setPrivateGamesFinished(privateGamesFinished);
-      setPlayersCountries(playersCountries);
+      setPlayersCountries(listCountriesToMap(playersCountries));
+      setDates(dates);
+      setDateSelected(dates[0]);
     }
   };
 
+  const handleChangeDate = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setDateSelected(value);
+  };
+
+  const refreshCurrentDate = async () => {
+    const date = splitDate(dateSelected);
+    const response = await services.GetStatisticsOfDate(
+      date[2],
+      date[1],
+      date[0]
+    );
+    setCurrentPublicGamesStarted(response.publicGamesStarted);
+    setCurrentPublicGamesFinished(response.publicGamesFinished);
+    setCurrentPrivateGamesStarted(response.privateGamesStarted);
+    setCurrentPrivateGamesFinished(response.privateGamesFinished);
+    setCurrentPlayersCountries(listCountriesToMap(response.playersCountries));
+  };
+
   return (
-    <Stack mt={8} mb={-12.5}>
-      <div className="tarjetas">
-        <Grid container spacing={4} justifyContent="left">
-          <Grid item xs={3} style={{ textAlign: "center" }}>
-            <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 300 }}>
-              <CardContent>
-                <h1>ESTADISTICAS DEL MES</h1>
-                <Stack direction="row" justifyContent="center" mt={4}>
-                  <b>Partidas publicas empezadas </b>
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    style={{ background: "#053742" }}
-                    disableRipple={true}
-                  >
-                    {publicGamesStarted.length}
-                  </Button>
-                </Stack>
-                <Stack direction="row" justifyContent="center" mt={4}>
-                  <b>Partidas publicas finalizadas </b>
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    style={{ background: "#053742" }}
-                    disableRipple={true}
-                  >
-                    {publicGamesFinished.length}
-                  </Button>
-                </Stack>
-                <Stack direction="row" justifyContent="center" mt={4}>
-                  <b>Partidas privadas empezadas </b>
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    style={{ background: "#053742" }}
-                    disableRipple={true}
-                  >
-                    {privateGamesStarted.length}
-                  </Button>
-                </Stack>
-                <Stack direction="row" justifyContent="center" mt={4}>
-                  <b>Partidas privadas finalizadas </b>
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    style={{ background: "#053742" }}
-                    disableRipple={true}
-                  >
-                    {privateGamesFinished.length}
-                  </Button>
-                </Stack>
-                <Stack justifyContent="center" mt={4}>
-                  <b>Origen de conexion de jugadores </b>
-                  {playersCountries.forEach(function (value, key) {
-                    console.log(key + " = " + value);
-                  })}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </div>
-      <div>
-        <Stack direction="row" mt={-68} justifyContent="center">
-          <Grid container spacing={4} justifyContent="center">
-            <Grid item xs={3} style={{ textAlign: "center" }}>
-              <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 320 }}>
-                <CardContent>
-                  <h1>ESTADISTICAS DE LA FECHA</h1>
-                  <Stack direction="row" justifyContent="center" mt={4}>
-                    <b>Partidas publicas empezadas </b>
-                    <Button
-                      variant="contained"
-                      type="submit"
-                      style={{ background: "#4A235A" }}
-                      disableRipple={true}
-                    >
-                      {currentStatistic.publicGamesStarted.length}
-                    </Button>
-                  </Stack>
-                  <Stack direction="row" justifyContent="center" mt={4}>
-                    <b>Partidas publicas finalizadas </b>
-                    <Button
-                      variant="contained"
-                      type="submit"
-                      style={{ background: "#4A235A" }}
-                      disableRipple={true}
-                    >
-                      {currentStatistic.publicGamesFinished.length}
-                    </Button>
-                  </Stack>
-                  <Stack direction="row" justifyContent="center" mt={4}>
-                    <b>Partidas privadas empezadas </b>
-                    <Button
-                      variant="contained"
-                      type="submit"
-                      style={{ background: "#4A235A" }}
-                      disableRipple={true}
-                    >
-                      {currentStatistic.privateGamesStarted.length}
-                    </Button>
-                  </Stack>
-                  <Stack direction="row" justifyContent="center" mt={4}>
-                    <b>Partidas privadas finalizadas </b>
-                    <Button
-                      variant="contained"
-                      type="submit"
-                      style={{ background: "#4A235A" }}
-                      disableRipple={true}
-                    >
-                      {currentStatistic.privateGamesFinished.length}
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Stack>
-      </div>
-      <div>
-        <Stack direction="row" ml={90} mt={-68}>
-          <Grid container spacing={4} justifyContent="center">
-            <Grid item xs={3} style={{ textAlign: "center" }}>
-              <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 320 }}>
-                <CardContent>
-                  <h1>SELECCIONAR FECHA</h1>
-                  <Stack direction="row" justifyContent="center" mt={4}>
-                    <b>Partidas publicas empezadas </b>
-                    <Button
-                      variant="contained"
-                      type="submit"
-                      style={{ background: "#053742" }}
-                      disableRipple={true}
-                    >
-                      {publicGamesStarted}
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Stack>
-      </div>
-    </Stack>
+    <Grid container spacing={55}>
+      <Grid container item xs={2} ml={9} mt={4} style={{ textAlign: "center" }}>
+        <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 320 }}>
+          <CardContent>
+            <h1>ESTADISTICAS DEL MES</h1>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas publicas empezadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#053742" }}
+                disableRipple={true}
+              >
+                {publicGamesStarted.length}
+              </Button>
+            </Stack>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas publicas finalizadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#053742" }}
+                disableRipple={true}
+              >
+                {publicGamesFinished.length}
+              </Button>
+            </Stack>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas privadas empezadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#053742" }}
+                disableRipple={true}
+              >
+                {privateGamesStarted.length}
+              </Button>
+            </Stack>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas privadas finalizadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#053742" }}
+                disableRipple={true}
+              >
+                {privateGamesFinished.length}
+              </Button>
+            </Stack>
+            <Stack justifyContent="center" mt={4}>
+              <b>Origen de conexion de jugadores </b>
+              {Object.keys(playersCountries).map((key, index) => {
+                return (
+                  <div key={index}>
+                    <p>
+                      <b>{key}:</b> {playersCountries[key]}
+                    </p>
+                  </div>
+                );
+              })}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid container item xs={2} mt={4} style={{ textAlign: "center" }}>
+        <Card style={{ background: "#ffffff9e" }} sx={{ minWidth: 320 }}>
+          <CardContent>
+            <h1>ESTADISTICAS DE LA FECHA</h1>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas publicas empezadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#0C3F03" }}
+                disableRipple={true}
+              >
+                {currentPublicGamesStarted.length}
+              </Button>
+            </Stack>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas publicas finalizadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#0C3F03" }}
+                disableRipple={true}
+              >
+                {currentPublicGamesFinished.length}
+              </Button>
+            </Stack>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas privadas empezadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#0C3F03" }}
+                disableRipple={true}
+              >
+                {currentPrivateGamesStarted.length}
+              </Button>
+            </Stack>
+            <Stack direction="row" justifyContent="center" mt={4}>
+              <b>Partidas privadas finalizadas </b>
+              <Button
+                variant="contained"
+                type="submit"
+                style={{ background: "#0C3F03" }}
+                disableRipple={true}
+              >
+                {currentPrivateGamesFinished.length}
+              </Button>
+            </Stack>
+            <Stack justifyContent="center" mt={4}>
+              <b>Origen de conexion de jugadores </b>
+              {Object.keys(currentPlayersCountries).map((key, index) => {
+                return (
+                  <div key={index}>
+                    <p>
+                      <b>{key}:</b> {currentPlayersCountries[key]}
+                    </p>
+                  </div>
+                );
+              })}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid container item xs={2} mt={4} style={{ textAlign: "center" }}>
+        <Card
+          style={{ background: "#ffffff9e" }}
+          sx={{ minWidth: 320, maxHeight: 275 }}
+        >
+          <CardContent>
+            <h1>SELECCIONAR FECHA</h1>
+            <Stack direction="row" justifyContent="center" mt={2}>
+              <Select value={dateSelected} onChange={handleChangeDate}>
+                {dates.map((d) => (
+                  <MenuItem value={d}>{dateToArgFormat(d)}</MenuItem>
+                ))}
+              </Select>
+            </Stack>
+            <Stack direction="row" justifyContent="center" mt={2}>
+              <Button
+                variant="contained"
+                style={{ background: "#39A2DB" }}
+                onClick={() => refreshCurrentDate()}
+              >
+                Actualizar
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
   );
 }
 
-const getSumCountries = (data) => {
-  const result = new Map();
+const listCountriesToMap = (data) => {
+  let result = {};
   for (const country of data) {
-    result[country] = result[country] ? result[country] + 1 : 1;
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] === country) {
+        sum += 1;
+      }
+    }
+    result[country] = sum;
   }
   return result;
+};
+
+const splitDate = (date) => {
+  return date.split("-");
+};
+
+const dateToArgFormat = (date) => {
+  const split = date.split("-");
+  return `${split[2]}-${split[1]}-${split[0]}`;
 };

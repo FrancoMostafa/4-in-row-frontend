@@ -15,10 +15,10 @@ async function GetAllStatistics() {
   return [];
 }
 
-async function GetStatisticsOfDate() {
+async function GetStatisticsOfDate(day, month, year) {
   try {
     const response = await axios({
-      url: `${baseUrl}/statistics/get`,
+      url: `${baseUrl}/statistics/get/${day}/${month}/${year}`,
       method: "GET",
     });
     return response.data;
