@@ -5,3 +5,5 @@ El proyecto corresponde a la parte gráfica del clásico juego de mesa "Cuatro e
 Para visitar el juego ingrese a:
 https://4enlinea.vercel.app
 
+Para chequear las estadísticas del juego:
+https://4enlinea.vercel.app/estadisticas
