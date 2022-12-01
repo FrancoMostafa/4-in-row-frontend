@@ -9,3 +9,5 @@ https://4enlinea.vercel.app
 
 Para chequear las estadísticas del juego:
 https://4enlinea.vercel.app/estadisticas
+
+Repositorio de backend: https://github.com/FrancoMostafa/4-in-row-backend
