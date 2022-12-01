@@ -907,7 +907,7 @@ const SwalStart = (changeTimer, pData, tData) => {
 
   return Swal.fire({
     icon: "warning",
-    title: "Comienza el juego"`Comienza el juego, turno de ${namePlayerTurn}`,
+    title: `Comienza el juego, turno de ${namePlayerTurn}`,
     heightAuto: false,
     allowOutsideClick: false,
     showCancelButton: false,
