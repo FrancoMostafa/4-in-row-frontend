@@ -897,13 +897,17 @@ const SwalStart = (changeTimer, pData, tData) => {
     changeTimer(0, 45, pData, tData);
   };
 
+  let namePlayerTurn = pData.player1Name;
+  if (tData === 2) {
+    namePlayerTurn = pData.player2Name;
+  }
   gameVersion += 1;
-  SendNewGameDataToStatistics(`${gameId}_${gameVersion}`, gameType, "STARTED")
+  SendNewGameDataToStatistics(`${gameId}_${gameVersion}`, gameType, "STARTED");
   SwalStartAction();
 
   return Swal.fire({
     icon: "warning",
-    title: "Comienza el juego",
+    title: "Comienza el juego"`Comienza el juego, turno de ${namePlayerTurn}`,
     heightAuto: false,
     allowOutsideClick: false,
     showCancelButton: false,
@@ -989,7 +993,11 @@ const SwalRoundWinner = (winnerColor, pData, swalRematch, resetBoard) => {
     if (pData.player1Wins === 3 || pData.player2Wins === 3) {
       gameEnd = true;
       SwalPlayerWinner(winnerRoundName, swalRematch, pData);
-      SendNewGameDataToStatistics(`${gameId}_${gameVersion}`, gameType, "FINISHED")
+      SendNewGameDataToStatistics(
+        `${gameId}_${gameVersion}`,
+        gameType,
+        "FINISHED"
+      );
     }
   };
 
@@ -1081,5 +1089,5 @@ const SwalRematchWaiting = () => {
 };
 
 const SendNewGameDataToStatistics = (id, type, status) => {
-  services.SaveNewDataOfStatistics(id,type,status);
-}
+  services.SaveNewDataOfStatistics(id, type, status);
+};
